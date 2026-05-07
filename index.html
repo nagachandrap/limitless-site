@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Limitless</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a08;
+    --surface: #111110;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e4dc;
+    --text-muted: #6b6760;
+    --text-dim: #3d3b37;
+    --border: #1e1d1a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.4s ease, width 0.3s ease, height 0.3s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Canvas background */
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Layout */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 28px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    background: rgba(10,10,8,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--gold); }
+  .nav-tag {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 100px;
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(72px, 10vw, 140px);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+    margin-bottom: 48px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--text-muted);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+    margin-bottom: 64px;
+    font-weight: 300;
+  }
+
+  .hero-desc strong {
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .scroll-hint {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-hint::before {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 24px;
+    background: var(--text-dim);
+    animation: pulse 2s ease infinite;
+  }
+
+  /* Divider */
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  /* What section */
+  .what {
+    padding: 120px 0;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 80px;
+  }
+
+  .what-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .what-left h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+  .what-left h2 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .what-left p {
+    font-size: 12px;
+    line-height: 2.2;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 420px;
+  }
+
+  .what-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 12px;
+  }
+
+  .what-item {
+    padding: 28px 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 24px;
+    align-items: start;
+    transition: border-color 0.3s;
+  }
+  .what-item:hover { border-color: var(--gold-dim); }
+
+  .what-num {
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .what-text h4 {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .what-text p {
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* Traction */
+  .traction {
+    padding: 80px 0 120px;
+    border-top: 1px solid var(--border);
+  }
+
+  .traction-inner {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .traction-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .traction-label em {
+    font-style: italic;
+    color: var(--gold);
+    display: block;
+  }
+
+  .traction-sectors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sector-tag {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .sector-tag:hover {
+    border-color: var(--gold-dim);
+    color: var(--text);
+  }
+
+  .traction-note {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.8;
+    grid-column: 2;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .footer-logo span { color: var(--gold); }
+
+  .footer-right {
+    text-align: right;
+  }
+  .footer-email {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    cursor: none;
+  }
+  .footer-email:hover { color: var(--gold); }
+
+  .footer-copy {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .wrap { padding: 0 24px; }
+    nav { padding: 24px; }
+    .what-grid { grid-template-columns: 1fr; gap: 48px; }
+    .traction-inner { grid-template-columns: 1fr; gap: 40px; }
+    .traction-note { grid-column: 1; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-right { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<canvas id="bg"></canvas>
+
+<nav id="nav">
+  <div class="logo">Limit<span>less</span></div>
+  <div class="nav-tag">Est. 2026 — India</div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-eyebrow">B2B Enterprise AI — India</div>
+      <h1 class="hero-title">Rise above<br>the <em>limits.</em></h1>
+      <p class="hero-desc">
+        We are building an <strong>operating system for mid and large enterprises</strong> — one that runs workflows, automates information, and elevates decision-making across every layer of the business.<br><br>
+        The opportunity is vast. The conviction, deeper. The pace, relentless.
+      </p>
+      <div class="hero-cta">
+        <div class="scroll-hint">Scroll</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <section class="what">
+    <div class="wrap">
+      <div class="section-label">What we're building</div>
+      <div class="what-grid">
+        <div class="what-left reveal">
+          <h2>Intelligence that <em>runs</em> the business.</h2>
+          <p>
+            Most enterprises sit on enormous amounts of operational data — locked in systems that don't talk to each other, trapped in people's heads, lost every time someone leaves. We're building the layer that changes that permanently.
+          </p>
+        </div>
+        <div class="what-right">
+          <div class="what-item reveal reveal-delay-1">
+            <div class="what-num">01</div>
+            <div class="what-text">
+              <h4>Workflow Automation</h4>
+              <p>Connects fragmented systems and runs multi-step business processes end-to-end — without manual intervention.</p>
+            </div>
+          </div>
+          <div class="what-item reveal reveal-delay-2">
+            <div class="what-num">02</div>
+            <div class="what-text">
+              <h4>Decision Intelligence</h4>
+              <p>Surfaces the right information at the right moment. Answers the questions every leader is asking before they ask them.</p>
+            </div>
+          </div>
+          <div class="what-item reveal reveal-delay-3">
+            <div class="what-num">03</div>
+            <div class="what-text">
+              <h4>Institutional Memory</h4>
+              <p>Captures what the business knows. The intelligence that once lived only in a person's head — never walks out the door again.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="traction">
+    <div class="wrap">
+      <div class="traction-inner">
+        <div class="traction-label reveal">
+          Already in<br>the <em>field.</em>
+        </div>
+        <div>
+          <div class="traction-sectors reveal">
+            <div class="sector-tag">Infrastructure</div>
+            <div class="sector-tag">Plastics</div>
+            <div class="sector-tag">Solar</div>
+            <div class="sector-tag">Manufacturing</div>
+            <div class="sector-tag">Trading</div>
+          </div>
+          <p class="traction-note reveal reveal-delay-1">
+            We have onboarded some of the largest players across sectors.<br>
+            We are not announcing names yet — but the proof is in production.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+    <div class="footer-logo">Limit<span>less</span></div>
+    <div class="footer-right">
+      <div class="footer-copy">© 2026 Limitless. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) *.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '48px'; ring.style.height = '48px'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px'; });
+  });
+
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Particle canvas
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.size = Math.random() * 1 + 0.3;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.4 + 0.1;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  function drawConnections() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(201,168,76,${0.06 * (1 - dist/120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawConnections();
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
