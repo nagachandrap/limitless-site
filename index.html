@@ -1,622 +1,545 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Limitless</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Limitless — AI for Business</title>
+  <meta name="description" content="Limitless helps businesses work smarter with AI. Faster decisions, less manual work, better visibility across your operations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4ec;
+      --surface: #ffffff;
+      --surface-2: #fbf9f1;
+      --rule: #e8e3d4;
+      --rule-strong: #d4ceba;
+      --ink: #14140f;
+      --ink-muted: #6b6760;
+      --ink-dim: #9a9685;
+      --green: #5a7530;
+      --green-deep: #3e5320;
+      --green-glow: #b6cf6e;
+    }
 
-  :root {
-    --bg: #0a0a08;
-    --surface: #111110;
-    --gold: #c9a84c;
-    --gold-dim: #8a6e2f;
-    --text: #e8e4dc;
-    --text-muted: #6b6760;
-    --text-dim: #3d3b37;
-    --border: #1e1d1a;
-  }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: none;
-  }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-  /* Custom cursor */
-  .cursor {
-    position: fixed;
-    width: 6px;
-    height: 6px;
-    background: var(--gold);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transition: transform 0.15s ease;
-    transform: translate(-50%, -50%);
-  }
-  .cursor-ring {
-    position: fixed;
-    width: 32px;
-    height: 32px;
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    transition: transform 0.4s ease, width 0.3s ease, height 0.3s ease;
-    transform: translate(-50%, -50%);
-  }
+    a { color: inherit; text-decoration: none; }
 
-  /* Canvas background */
-  canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 0;
-    opacity: 0.4;
-  }
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 72px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      background: rgba(247,244,236,0.78);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+    nav.scrolled { border-color: var(--rule); }
 
-  /* Layout */
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 48px;
-  }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .logo span { color: var(--green); }
 
-  /* Nav */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    padding: 28px 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.3s, background 0.3s;
-  }
-  nav.scrolled {
-    border-color: var(--border);
-    background: rgba(10,10,8,0.92);
-    backdrop-filter: blur(12px);
-  }
-  .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    color: var(--text);
-    text-transform: uppercase;
-  }
-  .logo span { color: var(--gold); }
-  .nav-tag {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-  }
+    .nav-right { display: flex; align-items: center; gap: 32px; }
+    .nav-link {
+      font-size: 14px;
+      color: var(--ink-muted);
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--ink); }
 
-  /* Hero */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-top: 100px;
-  }
+    .nav-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--ink); color: var(--bg); }
 
-  .hero-eyebrow {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 40px;
-    opacity: 0;
-    animation: fadeUp 0.8s ease 0.2s forwards;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .hero-eyebrow::before {
-    content: '';
-    display: inline-block;
-    width: 40px;
-    height: 1px;
-    background: var(--gold);
-  }
+    /* HERO */
+    .hero {
+      padding: 130px 40px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-  .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(72px, 10vw, 140px);
-    font-weight: 300;
-    line-height: 0.9;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    opacity: 0;
-    animation: fadeUp 0.8s ease 0.4s forwards;
-    margin-bottom: 48px;
-  }
-  .hero-title em {
-    font-style: italic;
-    color: var(--gold);
-  }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border: 1px solid var(--rule-strong);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: 0.02em;
+      margin-bottom: 40px;
+    }
+    .pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 14px var(--green-glow);
+    }
 
-  .hero-desc {
-    max-width: 560px;
-    font-size: 13px;
-    line-height: 2;
-    color: var(--text-muted);
-    opacity: 0;
-    animation: fadeUp 0.8s ease 0.6s forwards;
-    margin-bottom: 64px;
-    font-weight: 300;
-  }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 32px;
+      max-width: 14ch;
+    }
+    h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--green);
+    }
 
-  .hero-desc strong {
-    color: var(--text);
-    font-weight: 400;
-  }
+    .hero-sub {
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--ink-muted);
+      max-width: 56ch;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
 
-  .hero-cta {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    opacity: 0;
-    animation: fadeUp 0.8s ease 0.8s forwards;
-  }
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-  .scroll-hint {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .scroll-hint::before {
-    content: '';
-    display: inline-block;
-    width: 1px;
-    height: 24px;
-    background: var(--text-dim);
-    animation: pulse 2s ease infinite;
-  }
+    .btn-primary {
+      padding: 14px 28px;
+      background: var(--ink);
+      color: var(--bg);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      transition: all 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-primary:hover { background: var(--green); color: #fff; }
+    .btn-primary::after { content: '→'; transition: transform 0.25s; }
+    .btn-primary:hover::after { transform: translateX(4px); }
 
-  /* Divider */
-  .section-divider {
-    width: 100%;
-    height: 1px;
-    background: var(--border);
-    margin: 0;
-  }
+    .btn-secondary {
+      padding: 14px 24px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+    .btn-secondary:hover { color: var(--green); }
 
-  /* What section */
-  .what {
-    padding: 120px 0;
-  }
+    /* STATS */
+    .stats {
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      margin: 60px 0 0;
+      background: var(--surface-2);
+    }
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 0 40px;
+    }
+    .stat {
+      padding: 36px 28px;
+      border-right: 1px solid var(--rule);
+    }
+    .stat:last-child { border-right: none; }
 
-  .section-label {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--gold-dim);
-    text-transform: uppercase;
-    margin-bottom: 64px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-    max-width: 80px;
-  }
+    .stat-num {
+      font-family: 'Fraunces', serif;
+      font-size: 42px;
+      font-weight: 400;
+      color: var(--green);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .stat-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
 
-  .what-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: start;
-  }
+    /* SECTIONS */
+    section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
 
-  .what-left h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(36px, 4vw, 56px);
-    font-weight: 300;
-    line-height: 1.15;
-    color: var(--text);
-    margin-bottom: 32px;
-  }
-  .what-left h2 em {
-    font-style: italic;
-    color: var(--gold);
-  }
+    .section-tag {
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+    }
+    .section-tag::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--green);
+    }
 
-  .what-left p {
-    font-size: 12px;
-    line-height: 2.2;
-    color: var(--text-muted);
-    font-weight: 300;
-    max-width: 420px;
-  }
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(36px, 5vw, 60px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      max-width: 18ch;
+      margin-bottom: 32px;
+    }
+    h2 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--green);
+    }
 
-  .what-right {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin-top: 12px;
-  }
+    .section-intro {
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--ink-muted);
+      max-width: 60ch;
+      margin-bottom: 64px;
+      font-weight: 300;
+    }
 
-  .what-item {
-    padding: 28px 0;
-    border-top: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 32px 1fr;
-    gap: 24px;
-    align-items: start;
-    transition: border-color 0.3s;
-  }
-  .what-item:hover { border-color: var(--gold-dim); }
+    /* CARDS */
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .cards-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
 
-  .what-num {
-    font-size: 10px;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-  }
+    .card {
+      padding: 36px 32px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      border-color: var(--rule-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(20,20,15,0.04);
+    }
 
-  .what-text h4 {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text);
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-  .what-text p {
-    font-size: 11px;
-    line-height: 1.8;
-    color: var(--text-muted);
-    font-weight: 300;
-  }
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 24px;
+      display: inline-block;
+    }
+    .card h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .card p {
+      font-size: 15px;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
 
-  /* Traction */
-  .traction {
-    padding: 80px 0 120px;
-    border-top: 1px solid var(--border);
-  }
+    /* PRINCIPLES */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+    }
+    .principle {
+      border-top: 1px solid var(--ink);
+      padding-top: 28px;
+    }
+    .principle-num {
+      font-family: 'Fraunces', serif;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .principle h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: var(--ink);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .principle p {
+      font-size: 14px;
+      color: var(--ink-muted);
+      line-height: 1.65;
+      font-weight: 300;
+    }
 
-  .traction-inner {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 80px;
-    align-items: center;
-  }
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 130px 40px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--rule);
+      max-width: none;
+    }
+    .cta-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .cta h2 {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 18ch;
+    }
+    .cta-sub {
+      font-size: 17px;
+      color: var(--ink-muted);
+      max-width: 52ch;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .cta-email {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--ink-dim);
+    }
 
-  .traction-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 42px;
-    font-weight: 300;
-    line-height: 1.1;
-    color: var(--text);
-  }
-  .traction-label em {
-    font-style: italic;
-    color: var(--gold);
-    display: block;
-  }
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 36px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .footer-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: var(--ink);
+    }
+    .footer-logo span { color: var(--green); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--ink-muted);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--ink); }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
 
-  .traction-sectors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .sector-tag {
-    padding: 8px 16px;
-    border: 1px solid var(--border);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    transition: border-color 0.3s, color 0.3s;
-  }
-  .sector-tag:hover {
-    border-color: var(--gold-dim);
-    color: var(--text);
-  }
-
-  .traction-note {
-    margin-top: 24px;
-    font-size: 11px;
-    color: var(--text-dim);
-    font-style: italic;
-    line-height: 1.8;
-    grid-column: 2;
-  }
-
-  /* Footer */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 48px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .footer-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 18px;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .footer-logo span { color: var(--gold); }
-
-  .footer-right {
-    text-align: right;
-  }
-  .footer-email {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.3s;
-    cursor: none;
-  }
-  .footer-email:hover { color: var(--gold); }
-
-  .footer-copy {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    margin-top: 8px;
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
-
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .reveal-delay-1 { transition-delay: 0.1s; }
-  .reveal-delay-2 { transition-delay: 0.2s; }
-  .reveal-delay-3 { transition-delay: 0.3s; }
-
-  /* Mobile */
-  @media (max-width: 768px) {
-    .wrap { padding: 0 24px; }
-    nav { padding: 24px; }
-    .what-grid { grid-template-columns: 1fr; gap: 48px; }
-    .traction-inner { grid-template-columns: 1fr; gap: 40px; }
-    .traction-note { grid-column: 1; }
-    footer { flex-direction: column; gap: 24px; text-align: center; }
-    .footer-right { text-align: center; }
-  }
-</style>
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-right { gap: 16px; }
+      .nav-link { display: none; }
+      .hero { padding: 100px 20px 50px; }
+      section { padding: 70px 20px; }
+      .cta { padding: 90px 20px; }
+      .stats-inner { grid-template-columns: 1fr; padding: 0; }
+      .stat { border-right: none; border-bottom: 1px solid var(--rule); }
+      .stat:last-child { border-bottom: none; }
+      .cards-3, .cards-2, .principles { grid-template-columns: 1fr; gap: 20px; }
+      footer { padding: 28px 20px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-
-<canvas id="bg"></canvas>
-
+<!-- NAV -->
 <nav id="nav">
-  <div class="logo">Limit<span>less</span></div>
-  <div class="nav-tag">Est. 2026 — India</div>
+  <a href="#" class="logo">Limit<span>less.</span></a>
+  <div class="nav-right">
+    <a href="#about" class="nav-link">About</a>
+    <a href="#contact" class="nav-link">Contact</a>
+    <a href="mailto:enquiry@limitless-enterprise.ai" class="nav-btn">Get in touch</a>
+  </div>
 </nav>
 
-<main>
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-eyebrow">B2B Enterprise AI — India</div>
-      <h1 class="hero-title">Rise above<br>the <em>limits.</em></h1>
-      <p class="hero-desc">
-        We are building an <strong>operating system for mid and large enterprises</strong> — one that runs workflows, automates information, and elevates decision-making across every layer of the business.<br><br>
-        The opportunity is vast. The conviction, deeper. The pace, relentless.
-      </p>
-      <div class="hero-cta">
-        <div class="scroll-hint">Scroll</div>
-      </div>
+<!-- HERO -->
+<section class="hero">
+  <div class="pill">Bengaluru, India</div>
+  <h1>AI that helps businesses <em>work better</em></h1>
+  <p class="hero-sub">Limitless is an AI company building tools that help B2B businesses in India operate more efficiently — reducing manual work, improving visibility, and enabling faster decisions.</p>
+  <div class="hero-cta">
+    <a href="mailto:enquiry@limitless-enterprise.ai" class="btn-primary">Get in touch</a>
+    <a href="#about" class="btn-secondary">Learn more →</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-num">B2B</div>
+      <div class="stat-desc">Focused on business-to-business operations</div>
     </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <section class="what">
-    <div class="wrap">
-      <div class="section-label">What we're building</div>
-      <div class="what-grid">
-        <div class="what-left reveal">
-          <h2>Intelligence that <em>runs</em> the business.</h2>
-          <p>
-            Most enterprises sit on enormous amounts of operational data — locked in systems that don't talk to each other, trapped in people's heads, lost every time someone leaves. We're building the layer that changes that permanently.
-          </p>
-        </div>
-        <div class="what-right">
-          <div class="what-item reveal reveal-delay-1">
-            <div class="what-num">01</div>
-            <div class="what-text">
-              <h4>Workflow Automation</h4>
-              <p>Connects fragmented systems and runs multi-step business processes end-to-end — without manual intervention.</p>
-            </div>
-          </div>
-          <div class="what-item reveal reveal-delay-2">
-            <div class="what-num">02</div>
-            <div class="what-text">
-              <h4>Decision Intelligence</h4>
-              <p>Surfaces the right information at the right moment. Answers the questions every leader is asking before they ask them.</p>
-            </div>
-          </div>
-          <div class="what-item reveal reveal-delay-3">
-            <div class="what-num">03</div>
-            <div class="what-text">
-              <h4>Institutional Memory</h4>
-              <p>Captures what the business knows. The intelligence that once lived only in a person's head — never walks out the door again.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="stat">
+      <div class="stat-num">India</div>
+      <div class="stat-desc">Built for how Indian businesses actually work</div>
     </div>
-  </section>
-
-  <section class="traction">
-    <div class="wrap">
-      <div class="traction-inner">
-        <div class="traction-label reveal">
-          Already in<br>the <em>field.</em>
-        </div>
-        <div>
-          <div class="traction-sectors reveal">
-            <div class="sector-tag">Infrastructure</div>
-            <div class="sector-tag">Plastics</div>
-            <div class="sector-tag">Solar</div>
-            <div class="sector-tag">Manufacturing</div>
-            <div class="sector-tag">Trading</div>
-          </div>
-          <p class="traction-note reveal reveal-delay-1">
-            We have onboarded some of the largest players across sectors.<br>
-            We are not announcing names yet — but the proof is in production.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-    <div class="footer-logo">Limit<span>less</span></div>
-    <div class="footer-right">
-      <div class="footer-copy">© 2026 Limitless. All rights reserved.</div>
+    <div class="stat">
+      <div class="stat-num">AI</div>
+      <div class="stat-desc">Practical intelligence applied to real workflows</div>
     </div>
   </div>
+</div>
+
+<!-- WHAT WE DO -->
+<section id="about">
+  <div class="section-tag">What we do</div>
+  <h2>Making everyday business operations <em>smarter</em></h2>
+  <p class="section-intro">Indian B2B companies are highly capable but operationally stretched. Teams spend enormous time on tasks that should be instant — finding information, tracking commitments, and managing exceptions. Limitless builds AI tools that address these inefficiencies directly.</p>
+
+  <div class="cards-3">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>Faster operations</h3>
+      <p>Reduce the time your team spends on repetitive, manual tasks — so they can focus on work that actually moves the business forward.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Better visibility</h3>
+      <p>Give leadership and teams real-time clarity on what's happening across the business — without waiting for someone to compile a report.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h3>Smarter decisions</h3>
+      <p>Surface the right information at the right time so decisions get made faster, with more confidence and less back-and-forth.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHO WE WORK WITH -->
+<section>
+  <div class="section-tag">Who we work with</div>
+  <h2>Built for businesses <em>running India's economy</em></h2>
+  <p class="section-intro">We work with mid-sized B2B companies — manufacturers, traders, and distributors — where operations are complex and teams are non-technical.</p>
+
+  <div class="cards-2">
+    <div class="card">
+      <div class="card-icon">🏭</div>
+      <h3>Manufacturers</h3>
+      <p>Companies managing procurement, production, quality, and dispatch across multiple suppliers and buyers — where coordination overhead is high and errors are costly.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>Traders &amp; Distributors</h3>
+      <p>Businesses handling large transaction volumes across complex buyer-supplier networks, where real-time tracking and payment management are constant challenges.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section>
+  <div class="section-tag">Our principles</div>
+  <h2>How we think about <em>building</em></h2>
+  <p class="section-intro">A few things we believe deeply about building technology for Indian businesses.</p>
+
+  <div class="principles">
+    <div class="principle">
+      <div class="principle-num">01</div>
+      <h3>Meet people where they are</h3>
+      <p>The best technology works within the tools people already use — not by asking them to change their behaviour or learn something new.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-num">02</div>
+      <h3>Accuracy above all</h3>
+      <p>In business operations, wrong information is worse than no information. We are obsessive about reliability and never compromise on correctness.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-num">03</div>
+      <h3>Value before scale</h3>
+      <p>We work deeply with a small number of customers to build something genuinely useful before expanding. Quality of impact matters more than quantity of users.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="cta-inner">
+    <h2>Interested in <em>working with us?</em></h2>
+    <p class="cta-sub">We're currently onboarding a small group of pilot customers. If you run a B2B operation and are open to exploring what AI can do for your business, we'd love to talk.</p>
+    <a href="mailto:enquiry@limitless-enterprise.ai" class="btn-primary">Get in touch</a>
+    <div class="cta-email">enquiry@limitless-enterprise.ai · Bengaluru, India</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">Limit<span>less.</span></a>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="mailto:enquiry@limitless-enterprise.ai">enquiry@limitless-enterprise.ai</a>
+  </div>
+  <div class="footer-copy">© Limitless · Bengaluru, India</div>
 </footer>
 
 <script>
-  // Custom cursor
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  function animCursor() {
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) *.12;
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
-    requestAnimationFrame(animCursor);
-  }
-  animCursor();
-  document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => { ring.style.width = '48px'; ring.style.height = '48px'; });
-    el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px'; });
-  });
-
-  // Nav scroll
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
+    nav.classList.toggle('scrolled', window.scrollY > 30);
   });
-
-  // Particle canvas
-  const canvas = document.getElementById('bg');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  class Particle {
-    constructor() { this.reset(); }
-    reset() {
-      this.x = Math.random() * W;
-      this.y = Math.random() * H;
-      this.size = Math.random() * 1 + 0.3;
-      this.speedX = (Math.random() - 0.5) * 0.3;
-      this.speedY = (Math.random() - 0.5) * 0.3;
-      this.opacity = Math.random() * 0.4 + 0.1;
-    }
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-      if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
-    }
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(201,168,76,${this.opacity})`;
-      ctx.fill();
-    }
-  }
-
-  for (let i = 0; i < 80; i++) particles.push(new Particle());
-
-  function drawConnections() {
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(201,168,76,${0.06 * (1 - dist/120)})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
-  function animate() {
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => { p.update(); p.draw(); });
-    drawConnections();
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  // Scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.15 });
-  reveals.forEach(r => observer.observe(r));
 </script>
+
 </body>
 </html>
