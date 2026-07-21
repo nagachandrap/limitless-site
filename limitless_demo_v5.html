@@ -129,6 +129,28 @@ body { background:#F8FAFC; font-family:-apple-system,BlinkMacSystemFont,'Segoe U
 #tr .tr-n { font-size:100px; font-weight:800; color:rgba(26,86,219,0.15); letter-spacing:-6px; line-height:1; }
 #tr .tr-name { font-size:clamp(18px,3vw,32px); font-weight:700; color:#0F172A; margin-top:-24px; max-width:860px; line-height:1.3; word-break:normal; white-space:normal; }
 #tr .tr-fw { font-size:12px; color:#1A56DB; letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+
+/* ── MOBILE ── */
+@media (max-width:720px) {
+  /* Stack the two columns; phone (the chat) comes first, intel narration below */
+  #cols { grid-template-columns:1fr; gap:16px; }
+  #phone-wrap { position:static; top:auto; width:100%; max-width:380px; margin:0 auto; order:-1; }
+  #intel-panel { order:1; }
+
+  /* Intro — wrap the pill row and keep text off the edges */
+  #intro { padding:0 18px; }
+  #intro .logo { font-size:42px; letter-spacing:-2px; }
+  #intro .sub { font-size:12px; letter-spacing:2px; }
+  #intro .company-name { margin-bottom:40px; }
+  #intro .framework { flex-wrap:wrap; justify-content:center; max-width:100%; }
+  #intro .start-btn { padding:15px 40px; }
+
+  /* Scene card + transition breathing room */
+  #scene-card { padding:18px 18px; }
+  .sc-title { font-size:20px; }
+  #tr { padding:0 24px; }
+  #tr .tr-n { font-size:76px; letter-spacing:-4px; }
+}
 </style>
 </head>
 <body>
