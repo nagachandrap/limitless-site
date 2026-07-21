@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Limitless — Product Demo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#F8FAFC; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; color:#0F1C2E; overflow-x:hidden; }
+
+/* INTRO */
+#intro { position:fixed; inset:0; background:#F4F7FE; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; transition:opacity 0.9s ease; }
+#intro .logo { font-size:52px; font-weight:800; letter-spacing:-3px; color:#0F172A; margin-bottom:8px; }
+#intro .sub { font-size:15px; color:rgba(15,23,42,0.55); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+#intro .company-name { font-size:13px; color:rgba(15,23,42,0.4); margin-bottom:56px; }
+#intro .framework { display:flex; gap:6px; margin-bottom:48px; }
+.fw-pill { background:rgba(26,86,219,0.08); border:0.5px solid rgba(26,86,219,0.25); border-radius:20px; padding:5px 14px; font-size:11px; font-weight:600; letter-spacing:1px; color:#1A56DB; }
+#intro .start-btn { background:#1A56DB; color:#fff; border:none; border-radius:30px; padding:15px 48px; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:transform 0.15s,opacity 0.15s; }
+#intro .start-btn:hover { transform:scale(1.04); }
+
+/* LAYOUT */
+#main { width:100%; max-width:980px; padding:0 20px; display:none; }
+
+/* TOP BAR */
+#topbar { display:flex; align-items:center; justify-content:space-between; padding:20px 0 16px; border-bottom:0.5px solid rgba(15,28,46,0.1); margin-bottom:20px; }
+.tb-logo { font-size:20px; font-weight:800; letter-spacing:-1px; color:#1A56DB; }
+.tb-company { font-size:12px; color:rgba(15,28,46,0.45); margin-top:2px; }
+.tb-nav { display:flex; gap:6px; }
+.tb-dot { width:8px; height:8px; border-radius:50%; background:rgba(15,28,46,0.12); transition:all 0.3s; cursor:pointer; }
+.tb-dot.active { background:#1A56DB; transform:scale(1.3); }
+.tb-dot.done { background:rgba(26,86,219,0.3); }
+
+/* SCENE CARD */
+#scene-card { background:#fff; border:0.5px solid rgba(15,28,46,0.1); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+.sc-eyebrow { font-size:10px; font-weight:700; letter-spacing:3px; color:#1A56DB; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+.sc-eyebrow .fw-badge { background:rgba(26,86,219,0.08); border:0.5px solid rgba(26,86,219,0.25); border-radius:12px; padding:2px 10px; font-size:10px; }
+.sc-title { font-size:24px; font-weight:700; color:#0F1C2E; margin-bottom:6px; letter-spacing:-0.5px; }
+.sc-desc { font-size:13px; color:rgba(15,28,46,0.55); line-height:1.6; }
+
+/* PROGRESS */
+#prog-bar { height:2px; background:rgba(15,28,46,0.08); border-radius:2px; margin-bottom:20px; overflow:hidden; }
+#prog-fill { height:100%; background:#1A56DB; border-radius:2px; transition:width 0.25s linear; width:0%; }
+
+/* TWO-COLUMN LAYOUT */
+#cols { display:grid; grid-template-columns:1fr 340px; gap:20px; margin-bottom:20px; }
+
+/* LEFT — INTELLIGENCE PANEL */
+#intel-panel { display:flex; flex-direction:column; gap:12px; }
+.intel-card { background:#fff; border:0.5px solid rgba(15,28,46,0.1); border-radius:12px; padding:16px 18px; opacity:0; transform:translateY(10px); transition:opacity 0.4s ease, transform 0.4s ease; }
+.intel-card.visible { opacity:1; transform:translateY(0); }
+.intel-card.highlight { border-color:rgba(26,86,219,0.3); background:rgba(26,86,219,0.04); }
+.ic-label { font-size:10px; font-weight:700; letter-spacing:2px; color:rgba(15,28,46,0.4); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.ic-label .dot { width:6px; height:6px; border-radius:50%; background:#1A56DB; display:inline-block; }
+.ic-label .dot.sense { background:#3B82F6; }
+.ic-label .dot.think { background:#A855F7; }
+.ic-label .dot.act { background:#10B981; }
+.ic-label .dot.remember { background:#F97316; }
+.ic-label .dot.predict { background:#EF4444; }
+.ic-content { font-size:13px; color:rgba(15,28,46,0.75); line-height:1.65; }
+.ic-content b { color:#0F1C2E; }
+.ic-content i { color:rgba(15,28,46,0.4); font-size:11.5px; }
+.divl { border:none; border-top:0.5px solid rgba(15,28,46,0.08); margin:7px 0; }
+.tag { display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:5px; margin:2px 2px 0 0; font-weight:600; }
+.tok { background:rgba(26,86,219,0.1); color:#1A56DB; }
+.tok-g { background:rgba(5,150,105,0.1); color:#065F46; }
+.tok-w { background:rgba(217,119,6,0.1); color:#92400E; }
+.tok-r { background:rgba(220,38,38,0.1); color:#991B1B; }
+.tok-p { background:rgba(124,58,237,0.1); color:#5B21B6; }
+.tok-gold { background:rgba(26,86,219,0.1); color:#1A56DB; }
+.tok-act { background:rgba(5,150,105,0.1); color:#065F46; }
+
+/* METRIC ROW */
+.mrow { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+.mcard { background:rgba(15,28,46,0.04); border-radius:8px; padding:10px 12px; }
+.mcard .mv { font-size:18px; font-weight:700; color:#0F1C2E; }
+.mcard .ml { font-size:10px; color:rgba(15,28,46,0.45); margin-top:2px; }
+.mcard .mc { font-size:11px; margin-top:2px; }
+
+/* PREDICT CHAIN */
+.pred-step { display:flex; gap:10px; margin-bottom:10px; align-items:flex-start; }
+.pred-num { width:22px; height:22px; border-radius:50%; background:rgba(26,86,219,0.1); border:0.5px solid rgba(26,86,219,0.3); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#1A56DB; flex-shrink:0; margin-top:2px; }
+.pred-content { font-size:12.5px; color:rgba(15,28,46,0.7); line-height:1.55; }
+.pred-content b { color:#0F1C2E; }
+.pred-arrow { text-align:center; color:rgba(239,68,68,0.4); font-size:12px; margin:-4px 0 2px 16px; }
+
+/* RIGHT — PHONE */
+#phone-wrap { position:sticky; top:20px; height:fit-content; }
+.phone { background:#F4F7FE; border-radius:36px; border:1.5px solid rgba(26,86,219,0.2); overflow:hidden; box-shadow:0 24px 60px rgba(15,23,42,0.12),0 4px 16px rgba(15,23,42,0.08); }
+.phone-notch { background:#F4F7FE; height:26px; display:flex; align-items:center; justify-content:center; }
+.phone-notch-pill { width:80px; height:9px; background:#CBD5E1; border-radius:6px; }
+.wa-header { background:#075E54; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+.wa-av { width:34px; height:34px; border-radius:50%; background:#1A56DB; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#000; flex-shrink:0; }
+.wa-hname { color:#fff; font-size:13.5px; font-weight:600; }
+.wa-hsub { color:rgba(255,255,255,0.6); font-size:10.5px; }
+.wa-msgs { background:#0B141A; padding:10px; min-height:440px; max-height:440px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; scroll-behavior:smooth; }
+.wa-msgs::-webkit-scrollbar { width:2px; }
+.wa-msgs::-webkit-scrollbar-thumb { background:#1e1e1e; }
+.wmsg { max-width:86%; animation:fadeUp 0.3s ease forwards; opacity:0; }
+.wmsg.bot { align-self:flex-start; }
+.wmsg.user { align-self:flex-end; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.wbubble { padding:7px 9px 17px; border-radius:8px; font-size:12px; line-height:1.55; position:relative; }
+.wmsg.bot .wbubble { background:#202C33; color:#E9EDEF; border-top-left-radius:2px; }
+.wmsg.user .wbubble { background:#005C4B; color:#E9EDEF; border-top-right-radius:2px; }
+.wtime { font-size:9.5px; color:rgba(255,255,255,0.3); position:absolute; bottom:4px; right:7px; }
+.wmsg.user .wtime { color:rgba(255,255,255,0.4); }
+.wa-input-row { background:#1F2C34; padding:7px 10px; display:flex; gap:8px; align-items:center; }
+.wa-inp { flex:1; background:#2A3942; border:none; border-radius:18px; padding:7px 13px; font-size:12px; color:#E9EDEF; outline:none; }
+.wa-inp::placeholder { color:rgba(255,255,255,0.25); }
+.wa-send { width:34px; height:34px; border-radius:50%; background:#00A884; border:none; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.wa-send span { color:#fff; font-size:14px; }
+.typing-ind { display:flex; gap:4px; align-items:center; padding:9px 12px; background:#202C33; border-radius:8px; border-top-left-radius:2px; align-self:flex-start; }
+.typing-ind span { width:6px; height:6px; background:#666; border-radius:50%; animation:bounce 1.1s infinite; }
+.typing-ind span:nth-child(2){animation-delay:.18s}
+.typing-ind span:nth-child(3){animation-delay:.36s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* CONTROLS */
+#controls { display:flex; gap:10px; justify-content:center; padding:0 0 40px; flex-wrap:wrap; }
+.ctrl { background:#fff; border:0.5px solid rgba(15,28,46,0.15); border-radius:24px; padding:9px 22px; font-size:13px; color:rgba(15,28,46,0.65); cursor:pointer; transition:all 0.2s; }
+.ctrl:hover { background:#EFF6FF; color:#1A56DB; }
+.ctrl.primary { background:#1A56DB; color:#fff; border-color:#1A56DB; font-weight:700; }
+.ctrl.primary:hover { background:#1648C0; }
+.ctrl:disabled { opacity:0.25; cursor:default; }
+
+/* TRANSITION */
+#tr { position:fixed; inset:0; background:#F4F7FE; opacity:0; pointer-events:none; z-index:150; transition:opacity 0.35s; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:0 48px; text-align:center; }
+#tr.show { opacity:1; pointer-events:all; }
+#tr .tr-n { font-size:100px; font-weight:800; color:rgba(26,86,219,0.15); letter-spacing:-6px; line-height:1; }
+#tr .tr-name { font-size:clamp(18px,3vw,32px); font-weight:700; color:#0F172A; margin-top:-24px; max-width:860px; line-height:1.3; word-break:normal; white-space:normal; }
+#tr .tr-fw { font-size:12px; color:#1A56DB; letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div id="tr"><div class="tr-n" id="tr-n">01</div><div class="tr-name" id="tr-name">SENSE</div><div class="tr-fw" id="tr-fw">Framework Layer</div></div>
+
+<div id="intro">
+  <div class="logo">LIMITLESS</div>
+  <div class="sub">The Chanakya for India's Real Economy</div>
+  <div class="company-name">Bharat Pvt. Ltd. — Live Intelligence Demo</div>
+  <div class="framework">
+    <div class="fw-pill">SENSE</div>
+    <div class="fw-pill">THINK</div>
+    <div class="fw-pill">ACT</div>
+    <div class="fw-pill">REMEMBER</div>
+    <div class="fw-pill">PREDICT</div>
+  </div>
+  <button class="start-btn" onclick="startDemo()">▶ &nbsp;Play Demo</button>
+</div>
+
+<div id="main">
+  <div id="topbar">
+    <div>
+      <div class="tb-logo">LIMITLESS</div>
+      <div class="tb-company">Bharat Pvt. Ltd. · Manufacturing & Metals · Bengaluru</div>
+    </div>
+    <div class="tb-nav" id="tb-nav"></div>
+  </div>
+
+  <div id="scene-card">
+    <div class="sc-eyebrow">
+      <span id="sc-num">Scene 1 of 5</span>
+      <span class="fw-badge" id="sc-fw-badge">SENSE</span>
+    </div>
+    <div class="sc-title" id="sc-title">Detecting a crisis before anyone looks</div>
+    <div class="sc-desc" id="sc-desc">Limitless continuously monitors signals across MES, SAP, and market feeds. When something matters, it surfaces it instantly — without being asked.</div>
+  </div>
+
+  <div id="prog-bar"><div id="prog-fill"></div></div>
+
+  <div id="cols">
+    <div id="intel-panel"></div>
+    <div id="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="wa-header">
+          <div class="wa-av">L</div>
+          <div>
+            <div class="wa-hname">Limitless</div>
+            <div class="wa-hsub">Bharat Pvt. Ltd. · Online</div>
+          </div>
+        </div>
+        <div class="wa-msgs" id="msgs"></div>
+        <div class="wa-input-row">
+          <input class="wa-inp" id="inp" placeholder="Message Limitless…" readonly />
+          <div class="wa-send"><span>➤</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button class="ctrl" id="btn-prev" onclick="prevScene()" disabled>← Prev</button>
+    <button class="ctrl primary" id="btn-next" onclick="nextScene()">Next Scene →</button>
+    <button class="ctrl" onclick="replayScene()">↺ Replay</button>
+  </div>
+</div>
+
+<script>
+const scenes = [
+  /* ── SCENE 1 · SENSE ── */
+  {
+    fw:"SENSE", num:"01",
+    title:"Detecting a crisis before anyone looks",
+    desc:"Limitless monitors 14 live data streams across MES, SAP, vendor portals and market feeds simultaneously. When a signal crosses a threshold, it surfaces the alert — no one had to ask.",
+    intel:[
+      { delay:400, label:"SENSE · Signal Detection", dot:"sense", highlight:false,
+        html:`Scanning <b>14 live data streams</b> across Bharat Pvt. Ltd.<hr class="divl">
+        <div class="mrow">
+          <div class="mcard"><div class="mv">MES</div><div class="ml">Production signals</div><div class="mc tok">Live</div></div>
+          <div class="mcard"><div class="mv">SAP</div><div class="ml">Inventory & POs</div><div class="mc tok">Live</div></div>
+          <div class="mcard"><div class="mv">Tally</div><div class="ml">Finance & dues</div><div class="mc tok">Live</div></div>
+        </div>`
+      },
+      { delay:2400, label:"SENSE · Threshold Crossed", dot:"sense", highlight:true,
+        html:`<b>⚠ 3 signals detected at 11:47 AM</b><hr class="divl">
+        <span class="tag tok-w">MS Rod stock → 3.2 days remaining</span><br>
+        <span class="tag tok-w">Line 2 utilisation dropped to 74%</span><br>
+        <span class="tag tok-r">Zinc supplier Shyam Metals: ₹65k overdue · order risk</span><br><br>
+        <i>System correlated all three signals in 0.3 seconds. Arjun was in a client meeting — never looked at a dashboard.</i>`
+      }
+    ],
+    chat:[
+      { from:'bot', delay:800, time:'11:47 AM', html:`<span class="tag tok-w">⚠ Stock alert — Bharat Pvt. Ltd.</span><br><br>MS Rod stock has hit reorder level.<br><b>~3.2 days of production remaining.</b><br>Line 2 at risk of stoppage by Thursday.` },
+      { from:'bot', delay:3200, time:'11:47 AM', html:`<b>Correlated signals detected:</b><br>• Line 2 utilisation: 74% ↓ (was 96%)<br>• Zinc supplier Shyam Metals has ₹65k overdue — may delay next order<br>• 2 pending customer orders worth ₹28L depend on this stock<br><br>Want me to find the best vendor options?` },
+      { from:'user', delay:5800, time:'11:49 AM', html:`Yes, show me options` },
+    ]
+  },
+
+  /* ── SCENE 2 · THINK ── */
+  {
+    fw:"THINK", num:"02",
+    title:"Which vendor should I buy MS rods from?",
+    desc:"The owner asks a plain question. Limitless reasons across vendor history, outstanding dues, lead times, production schedules and live cash position simultaneously — surfacing the right answer with full context.",
+    intel:[
+      { delay:2000, label:"THINK · Cross-System Reasoning", dot:"think", highlight:false,
+        html:`<b>Reasoning across 6 data sources in parallel</b><hr class="divl">
+        <div class="mrow">
+          <div class="mcard"><div class="mv">SAP</div><div class="ml">Vendor PO history</div></div>
+          <div class="mcard"><div class="mv">Tally</div><div class="ml">Dues & payables</div></div>
+          <div class="mcard"><div class="mv">MES</div><div class="ml">Production schedule</div></div>
+        </div><br>
+        Weighing: lead time vs cost vs dues vs reliability vs cash impact`
+      },
+      { delay:4200, label:"THINK · Vendor Scorecard", dot:"think", highlight:true,
+        html:`<b>Vendor analysis — MS Rods (1,000 kg needed)</b><hr class="divl">
+        <b>Ravi Steels</b> · ₹91/kg · 3-day lead<br>
+        <span class="tag tok-g">Clean dues</span> <span class="tag tok-g">9.2/10 reliability</span> <span class="tag tok-g">Recommended</span><br><br>
+        <b>Bharat Metal Co</b> · ₹88/kg · 4-day lead<br>
+        <span class="tag tok-w">₹65k overdue</span> <span class="tag tok">Effective risk: 5 days</span><br><br>
+        <b>National Steel Depot</b> · ₹94/kg · 6-day lead<br>
+        <span class="tag tok-r">Too slow — Line 2 stops in 3.2 days</span>`
+      },
+      { delay:6800, label:"THINK · Cash Flow Check", dot:"think", highlight:false,
+        html:`Checking if PO of ₹91,000 is safe to raise now:<hr class="divl">
+        HDFC balance: <b>₹41.3L</b> · Payables this week: ₹8.3L<br>
+        Receivable due today (Ganesh Alloys): <b>₹13.2L</b><br><br>
+        <span class="tag tok-g">✓ Cash headroom confirmed — PO is safe to raise</span>`
+      }
+    ],
+    chat:[
+      { from:'user', delay:400, time:'11:49 AM', html:`Which vendor should I order MS rods from? Need 1,000 kg urgently.` },
+      { from:'bot', delay:2000, time:'11:49 AM', html:`Checking across SAP, Tally and MES — vendor history, dues, lead times and your cash position simultaneously…` },
+      { from:'bot', delay:4400, time:'11:50 AM', html:`<b>1. Ravi Steels</b> — ₹91/kg · 3-day lead<br><span class="tag tok-g">Clean dues</span> <span class="tag tok-g">9.2/10 reliability</span> <span class="tag tok-g">Recommended</span><br><br><b>2. Bharat Metal Co</b> — ₹88/kg · 4-day<br><span class="tag tok-w">₹65k overdue — order risk</span><br><br><b>3. National Steel Depot</b> — ₹94/kg · 6-day<br><span class="tag tok-r">Too slow for your 3.2-day stock window</span>` },
+      { from:'bot', delay:7200, time:'11:50 AM', html:`Cash check: ₹41.3L in bank, ₹13.2L receivable due today. A PO of ₹91,000 is safe.<br><br><span class="tag tok-g">Go ahead with Ravi Steels?</span>` },
+      { from:'user', delay:9200, time:'11:51 AM', html:`Yes, raise it` },
+    ]
+  },
+
+  /* ── SCENE 3 · ACT ── */
+  {
+    fw:"ACT", num:"03",
+    title:"Can you raise the PO and handle everything?",
+    desc:"One message. Limitless writes the PO into SAP, emails the vendor, routes the approval to the plant head, and logs the audit trail — without the user touching a single system.",
+    intel:[
+      { delay:2000, label:"ACT · Execution Sequence", dot:"act", highlight:false,
+        html:`<b>Executing PO #3829 — Ravi Steels · ₹91,000</b><hr class="divl">
+        <div class="pred-step"><div class="pred-num" style="background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.3);color:#1A56DB">1</div><div class="pred-content">Writing PO to <b>SAP S/4HANA</b> with material code, quantity, rate and delivery date</div></div>
+        <div class="pred-step"><div class="pred-num" style="background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.3);color:#1A56DB">2</div><div class="pred-content">Sending vendor confirmation email to Ravi Steels with PO PDF attached</div></div>
+        <div class="pred-step"><div class="pred-num" style="background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.3);color:#1A56DB">3</div><div class="pred-content">Routing approval to Plant Head <b>Vikram S.</b> via WhatsApp + email</div></div>
+        <div class="pred-step"><div class="pred-num" style="background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.3);color:#1A56DB">4</div><div class="pred-content">Logging action in audit trail with timestamp, user, and context snapshot</div></div>`
+      },
+      { delay:5000, label:"ACT · Result", dot:"act", highlight:true,
+        html:`<span class="tag tok-act">✓ PO #3829 raised in SAP</span><br><br>
+        Time from user message to confirmed PO: <b>4 minutes 12 seconds</b><hr class="divl">
+        <i>The same workflow previously took 5 to 14 days — manual emails, phone calls, spreadsheet lookups, approval chains.</i><br><br>
+        <div class="mrow">
+          <div class="mcard"><div class="mv" style="color:#065F46">4m 12s</div><div class="ml">Time taken today</div></div>
+          <div class="mcard"><div class="mv" style="color:#991B1B">5–14d</div><div class="ml">Previously</div></div>
+          <div class="mcard"><div class="mv" style="color:#1A56DB">99%</div><div class="ml">Time saved</div></div>
+        </div>`
+      }
+    ],
+    chat:[
+      { from:'user', delay:400, time:'11:51 AM', html:`Can you raise the PO with Ravi Steels and handle the approval and vendor notification too?` },
+      { from:'bot', delay:2000, time:'11:51 AM', html:`On it — writing to SAP, notifying vendor and routing approval simultaneously…<br><br>• PO #3829 → SAP S/4HANA ✓<br>• Email + PO PDF → Ravi Steels ✓<br>• Approval request → Vikram S. (Plant Head) ✓<br>• Audit log entry created ✓` },
+      { from:'bot', delay:5200, time:'11:52 AM', html:`<span class="tag tok-act">✓ PO #3829 raised — ₹91,000 · 3-day delivery</span><br><br>Expected delivery: 24 July 2026<br>Vikram S. has been notified for approval.<br>Ravi Steels confirmed via email.<br><br>I'll alert you when the GRN is posted in SAP.` },
+      { from:'bot', delay:7800, time:'11:52 AM', html:`<b>Time from your message to done: 4 min 12 sec.</b><br><br><i style="color:rgba(255,255,255,0.4);font-size:11px">Previously: 5–14 days of calls, emails, spreadsheets and follow-ups.</i>` },
+    ]
+  },
+
+  /* ── SCENE 4 · REMEMBER ── */
+  {
+    fw:"REMEMBER", num:"04",
+    title:"When should I place the next MS rod order?",
+    desc:"The owner asks a simple question. Limitless answers using 8 months of learnt business context — vendor behaviour patterns, seasonal cycles and rate triggers that were never written down anywhere.",
+    intel:[
+      { delay:2000, label:"REMEMBER · Business Context Graph", dot:"remember", highlight:false,
+        html:`<b>Bharat Pvt. Ltd. — context accumulated over 8 months</b><hr class="divl">
+        <div class="mrow">
+          <div class="mcard"><div class="mv">847</div><div class="ml">Decisions logged</div></div>
+          <div class="mcard"><div class="mv">23</div><div class="ml">Vendor patterns</div></div>
+          <div class="mcard"><div class="mv">14</div><div class="ml">Approval rules learnt</div></div>
+        </div>`
+      },
+      { delay:4000, label:"REMEMBER · Ravi Steels — learnt behaviour", dot:"remember", highlight:true,
+        html:`<b>Ravi Steels — patterns observed over 8 months</b><hr class="divl">
+        • <b>Delays by 1–2 days</b> in July–August every year (monsoon logistics)<br>
+        • <b>Rate spikes</b> when Mumbai LME spot price exceeds ₹95/kg<br>
+        • <b>Best negotiation window</b>: 25th–28th of month (end-of-month targets)<br>
+        • Ramesh Kumar (their sales rep) responds fastest before 10 AM<br><br>
+        <span class="tag tok-p">None of this was ever written down. Limitless learnt it passively.</span>`
+      },
+      { delay:6400, label:"REMEMBER · Seasonal & Cash Cycle Patterns", dot:"remember", highlight:false,
+        html:`<b>Business cycles detected across 8 months</b><hr class="divl">
+        • Q3 (Oct–Dec): sales spike 34% — pre-build inventory by Week 38<br>
+        • Zinc prices historically rise 12–18% in June (pre-monsoon hoarding)<br>
+        • Arjun approves POs above ₹5L only on Mon/Wed/Fri before 3 PM<br>
+        • Cash crunch pattern: Day 18–22 of every month (payroll + vendor cycle)<br><br>
+        <i>No consultant figured this out. Limitless did — over time, automatically.</i>`
+      }
+    ],
+    chat:[
+      { from:'user', delay:400, time:'2:14 PM', html:`When should I place the next MS rod order given the monsoon season?` },
+      { from:'bot', delay:2200, time:'2:14 PM', html:`Looking at 8 months of Ravi Steels history…<hr class="divl"><b>They delay 1–2 days in July–August</b> due to monsoon logistics every year. Effective lead time this month is 4–5 days, not 3.<br><br>Recommendation: <b>Place your next order by 21 July</b> to protect your production window.` },
+      { from:'bot', delay:5200, time:'2:15 PM', html:`Also — their rates spike when Mumbai LME spot crosses ₹95/kg. Spot is at <b>₹91.4/kg today</b>. Locking a forward order now saves ₹3–6/kg on your next 2,000 kg.<br><br><span class="tag tok-p">Suggested: 2,000 kg forward order at ₹91/kg, delivery 28 July.</span>` },
+      { from:'user', delay:8000, time:'2:15 PM', html:`Good catch. Lock it in.` },
+      { from:'bot', delay:9600, time:'2:16 PM', html:`<span class="tag tok-act">✓ Forward PO #3831 placed — 2,000 kg · ₹91/kg · ₹1,82,000</span><br>Delivery: 28 July. Rate locked before the monsoon spike window.` },
+    ]
+  },
+
+  /* ── SCENE 5 · PREDICT ── */
+  {
+    fw:"PREDICT", num:"05",
+    title:"How will the US–Iran war impact our sales?",
+    desc:"The owner asks one question. Limitless ingests live geopolitical data, maps it against the company's specific supplier network, raw material costs and customer industries — and delivers a 90-day P&L forecast with actions.",
+    intel:[
+      { delay:2000, label:"PREDICT · Signal Ingestion", dot:"predict", highlight:false,
+        html:`<b>US–Iran conflict — signals being processed</b><hr class="divl">
+        <span class="tag tok-r">Strait of Hormuz: 20% shipping disruption risk</span><br>
+        <span class="tag tok-w">Crude oil: $127/bbl (+38% in 14 days)</span><br>
+        <span class="tag tok-r">LME steel: +11% in 6 days on energy cost fears</span><br>
+        <span class="tag tok-w">INR/USD: ₹86.4 → ₹89.2 (import cost impact)</span><br>
+        <span class="tag tok-r">Gulf-routed logistics: 18–24 day delay risk</span><br><br>
+        <i>Cross-referencing against Bharat Pvt. Ltd.'s specific supplier and customer exposure…</i>`
+      },
+      { delay:5000, label:"PREDICT · Supply Chain Exposure", dot:"predict", highlight:true,
+        html:`<b>Your supply chain exposure mapped</b><hr class="divl">
+        <b>Direct exposure — 3 suppliers affected:</b><br>
+        • Zinc Traders India: 40% raw zinc via Gulf route <span class="tag tok-r">High risk</span><br>
+        • Shyam Metals: coking coal from Iran-adjacent corridor <span class="tag tok-w">Medium</span><br>
+        • Ravi Steels: domestic only <span class="tag tok-g">No impact</span><br><br>
+        <b>Cost impact on your BOM:</b><br>
+        • Zinc: +₹18–24/kg expected (your usage: 800 kg/month)<br>
+        • Energy surcharge on freight: +6–9%<br>
+        • Total COGS impact: <b>+₹2.8L–4.1L/month</b>`
+      },
+      { delay:8500, label:"PREDICT · Customer Industry Impact", dot:"predict", highlight:false,
+        html:`<b>Your customers' industries — war impact analysis</b><hr class="divl">
+        <b>Auto ancillary clients (42% of revenue)</b><br>
+        Production cuts expected -8 to -14% — <span class="tag tok-w">order softening in 6–10 weeks</span><br><br>
+        <b>Infrastructure / construction (31% of revenue)</b><br>
+        Govt infra push likely to accelerate — <span class="tag tok-g">demand steady or up</span><br><br>
+        <b>Export-linked clients (18% of revenue)</b><br>
+        USD realisation +3.2% but logistics delay risk — <span class="tag tok-w">mixed</span>`
+      },
+      { delay:12000, label:"PREDICT · 90-Day Revenue Forecast", dot:"predict", highlight:true,
+        html:`<b>Bharat Pvt. Ltd. — 90-day P&L impact model</b><hr class="divl">
+        <div class="mrow">
+          <div class="mcard"><div class="mv" style="color:#991B1B">-₹18–26L</div><div class="ml">Revenue at risk</div><div class="mc tok-w">Auto segment</div></div>
+          <div class="mcard"><div class="mv" style="color:#92400E">+₹4.1L</div><div class="ml">COGS increase</div><div class="mc tok-r">Monthly</div></div>
+          <div class="mcard"><div class="mv" style="color:#065F46">+₹9L</div><div class="ml">Infra upside</div><div class="mc tok-g">If captured</div></div>
+        </div><br>
+        <b>Net 90-day P&L impact: -₹11L to -₹21L</b> vs current trajectory<br><br>
+        <span class="tag tok-gold">3 specific actions identified to offset 60% of this risk →</span>`
+      },
+      { delay:15500, label:"PREDICT · Recommended Actions", dot:"predict", highlight:true,
+        html:`<b>3 actions to recover ₹13L of the ₹21L risk</b><hr class="divl">
+        <div class="pred-step"><div class="pred-num">1</div><div class="pred-content"><b>Lock zinc inventory for 90 days today</b> at ₹142/kg before +₹18–24/kg spike. Saves ₹14,400–19,200/month.</div></div>
+        <div class="pred-step"><div class="pred-num">2</div><div class="pred-content"><b>Shift 15% of auto-segment capacity to infra clients</b> — Arjun Industries and Nirmaan Infra have open RFQs. Captures ₹9L upside.</div></div>
+        <div class="pred-step"><div class="pred-num">3</div><div class="pred-content"><b>Renegotiate freight terms</b> with National Steel Depot to DDP before conflict escalates. Fixes logistics cost for 60 days.</div></div>`
+      }
+    ],
+    chat:[
+      { from:'user', delay:400, time:'9:08 AM', html:`How will the US–Iran war impact our sales?` },
+      { from:'bot', delay:2200, time:'9:08 AM', html:`Analysing now — cross-referencing your supplier network, customer industries, raw material costs and order pipeline against live conflict data…<br><br><span class="tag tok-r">Crude: +38%</span> <span class="tag tok-r">LME steel: +11%</span> <span class="tag tok-w">INR: ₹89.2</span>` },
+      { from:'bot', delay:5400, time:'9:09 AM', html:`<b>Supply chain: 3 of your suppliers exposed</b><hr class="divl">Zinc Traders India: Gulf-routed zinc — expected +₹18–24/kg<br>Shyam Metals: coking coal corridor affected<br>Ravi Steels: domestic only — safe ✅<br><br>Your COGS impact: <b>+₹2.8L–4.1L/month</b>` },
+      { from:'bot', delay:9000, time:'9:10 AM', html:`<b>Your customers' exposure</b><hr class="divl">Auto ancillary (42% of revenue): <span class="tag tok-w">-8 to -14% orders in 6–10 weeks</span><br>Infrastructure (31%): <span class="tag tok-g">demand steady or rising</span><br>Export clients (18%): better USD but logistics risk` },
+      { from:'bot', delay:12800, time:'9:10 AM', html:`<b>90-day net P&L forecast</b><hr class="divl">Revenue at risk: <b>₹18–26L</b> · COGS up: <b>₹4.1L/month</b><br>Infra upside available: <b>+₹9L</b><br><br><b>Net impact: -₹11L to -₹21L</b> vs trajectory<br><br><span class="tag tok-gold">3 actions identified to offset 60% of this →</span>` },
+      { from:'bot', delay:16200, time:'9:11 AM', html:`<b>This week:</b><br>1. Lock 90-day zinc stock at ₹142/kg<br>2. Shift 15% capacity to infra RFQs (Arjun Ind + Nirmaan)<br>3. Renegotiate freight to DDP with National Steel<br><br><span class="tag tok-act">Shall I raise the zinc PO and draft the RFQ responses now?</span>` },
+      { from:'user', delay:19500, time:'9:12 AM', html:`Yes, do it` },
+      { from:'bot', delay:21200, time:'9:12 AM', html:`<span class="tag tok-act">✓ Zinc PO #3835 raised — 2,400 kg · 90-day stock locked</span><br><span class="tag tok-act">✓ RFQ responses drafted for Arjun Ind & Nirmaan</span><br><br>Estimated risk offset: <b>₹12.8L</b> of the projected ₹21L impact.` },
+    ]
+  }
+]
+
+let cur = 0, running = false, timers = [], rafId = null;
+
+function startDemo() {
+  const intro = document.getElementById('intro');
+  intro.style.opacity = '0';
+  setTimeout(() => {
+    intro.style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    buildNav();
+    loadScene(0);
+  }, 900);
+}
+
+function buildNav() {
+  const nav = document.getElementById('tb-nav');
+  nav.innerHTML = scenes.map((_,i) => `<div class="tb-dot" id="dot-${i}" onclick="jumpTo(${i})"></div>`).join('');
+}
+
+function jumpTo(i) { showTransition(i, () => loadScene(i)); }
+
+function updateNav(idx) {
+  scenes.forEach((_,i) => {
+    const d = document.getElementById(`dot-${i}`);
+    if(d) d.className = 'tb-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+  });
+}
+
+function loadScene(idx) {
+  clearAll();
+  cur = idx;
+  const s = scenes[idx];
+  document.getElementById('sc-num').textContent = `Scene ${idx+1} of ${scenes.length}`;
+  document.getElementById('sc-fw-badge').textContent = s.fw;
+  document.getElementById('sc-title').textContent = s.title;
+  document.getElementById('sc-desc').textContent = s.desc;
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').textContent = idx === scenes.length-1 ? '↺ Restart' : 'Next Scene →';
+  document.getElementById('intel-panel').innerHTML = '';
+  document.getElementById('msgs').innerHTML = '';
+  document.getElementById('inp').value = '';
+  document.getElementById('prog-fill').style.width = '0%';
+  updateNav(idx);
+  playScene(s);
+}
+
+function playScene(s) {
+  running = true;
+  const allItems = [...s.intel, ...s.chat];
+  const maxDelay = Math.max(...allItems.map(x => x.delay)) + 2000;
+  let start = null;
+  function tick(ts) {
+    if (!start) start = ts;
+    const pct = Math.min(100, ((ts-start)/maxDelay)*100);
+    document.getElementById('prog-fill').style.width = pct+'%';
+    if (pct < 100 && running) rafId = requestAnimationFrame(tick);
+  }
+  rafId = requestAnimationFrame(tick);
+
+  s.intel.forEach((card, ci) => {
+    const t = setTimeout(() => {
+      if (!running) return;
+      const panel = document.getElementById('intel-panel');
+      const div = document.createElement('div');
+      div.className = 'intel-card' + (card.highlight ? ' highlight' : '');
+      div.id = `ic-${ci}`;
+      div.innerHTML = `<div class="ic-label"><span class="dot ${card.dot}"></span>${card.label}</div><div class="ic-content">${card.html}</div>`;
+      panel.appendChild(div);
+      requestAnimationFrame(() => { div.classList.add('visible'); });
+      panel.scrollTop = panel.scrollHeight;
+    }, card.delay);
+    timers.push(t);
+  });
+
+  s.chat.forEach((m, mi) => {
+    const t = setTimeout(() => {
+      if (!running) return;
+      const msgs = document.getElementById('msgs');
+      if (m.from === 'bot') {
+        const typ = document.createElement('div');
+        typ.className = 'typing-ind';
+        typ.innerHTML = '<span></span><span></span><span></span>';
+        msgs.appendChild(typ);
+        msgs.scrollTop = msgs.scrollHeight;
+        const t2 = setTimeout(() => {
+          if (!running) return;
+          typ.remove();
+          appendBubble(m.from, m.html, m.time);
+        }, 900);
+        timers.push(t2);
+      } else {
+        const inp = document.getElementById('inp');
+        const txt = m.html.replace(/<[^>]+>/g,'');
+        let ci = 0;
+        inp.value = '';
+        const typer = setInterval(() => {
+          if (ci < txt.length) { inp.value += txt[ci++]; }
+          else {
+            clearInterval(typer);
+            setTimeout(() => { inp.value = ''; appendBubble(m.from, m.html, m.time); }, 400);
+          }
+        }, 38);
+        timers.push(typer);
+      }
+    }, m.delay);
+    timers.push(t);
+  });
+}
+
+function appendBubble(from, html, time) {
+  const msgs = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = `wmsg ${from}`;
+  d.innerHTML = `<div class="wbubble">${html}<span class="wtime">${time}</span></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function clearAll() {
+  running = false;
+  timers.forEach(t => { clearTimeout(t); clearInterval(t); });
+  timers = [];
+  if (rafId) cancelAnimationFrame(rafId);
+}
+
+function nextScene() {
+  if (cur >= scenes.length-1) { showTransition(0, () => loadScene(0)); return; }
+  showTransition(cur+1, () => loadScene(cur+1));
+}
+function prevScene() {
+  if (cur <= 0) return;
+  showTransition(cur-1, () => loadScene(cur-1));
+}
+function replayScene() { loadScene(cur); }
+
+function showTransition(idx, cb) {
+  const tr = document.getElementById('tr');
+  document.getElementById('tr-n').textContent = String(idx+1).padStart(2,'0');
+  document.getElementById('tr-name').textContent = scenes[idx].title.toUpperCase();
+  document.getElementById('tr-fw').textContent = scenes[idx].fw + ' · Limitless Framework';
+  tr.classList.add('show');
+  setTimeout(() => { cb(); setTimeout(() => tr.classList.remove('show'), 400); }, 650);
+}
+
+/* ── Auto-resize: report content height to the parent frame so the ── *
+ * ── embedding iframe grows/shrinks to fit — no internal scrollbar ── */
+(function(){
+  function contentHeight(){
+    const main = document.getElementById('main');
+    if (main && getComputedStyle(main).display !== 'none') {
+      return Math.ceil(main.getBoundingClientRect().height) + 8;
+    }
+    return 640; // intro / transition baseline
+  }
+  let last = 0;
+  function postHeight(){
+    const h = contentHeight();
+    if (h === last) return;
+    last = h;
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type:'limitless-demo-height', height:h }, '*');
+    }
+  }
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(postHeight);
+    ro.observe(document.body);
+    const m = document.getElementById('main');
+    if (m) ro.observe(m);
+  } else {
+    setInterval(postHeight, 400);
+  }
+  postHeight();
+})();
+</script>
+</body>
+</html>
