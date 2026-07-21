@@ -129,6 +129,27 @@ body { background:#0A0A0A; font-family:-apple-system,BlinkMacSystemFont,'Segoe U
 #tr .tr-n { font-size:100px; font-weight:800; color:rgba(212,184,0,0.08); letter-spacing:-6px; line-height:1; }
 #tr .tr-name { font-size:clamp(18px,3vw,32px); font-weight:700; color:#fff; margin-top:-24px; max-width:860px; line-height:1.3; word-break:normal; white-space:normal; }
 #tr .tr-fw { font-size:12px; color:#D4B800; letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+
+/* ── RESPONSIVE (mobile) — layout only; colours & content unchanged ── */
+@media (max-width: 680px) {
+  #main { padding:0 14px; }
+  #cols { grid-template-columns:1fr; gap:16px; }
+  #phone-wrap { position:static; width:100%; max-width:360px; margin:0 auto; }
+  #topbar { flex-wrap:wrap; gap:10px; padding:16px 0 12px; }
+  #scene-card { padding:16px 18px; }
+  .sc-title { font-size:20px; }
+  #controls { padding:0 0 28px; }
+  #intro .logo { font-size:40px; letter-spacing:-2px; }
+  #intro .company-name { margin-bottom:40px; }
+  #intro .framework { flex-wrap:wrap; justify-content:center; max-width:320px; margin-bottom:36px; }
+}
+@media (max-width: 400px) {
+  #intro .logo { font-size:32px; }
+  #intro .sub { font-size:13px; letter-spacing:2px; }
+  .sc-title { font-size:18px; }
+  .fw-pill { padding:4px 10px; font-size:10px; }
+  .mrow { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -547,6 +568,38 @@ function showTransition(idx, cb) {
   tr.classList.add('show');
   setTimeout(() => { cb(); setTimeout(() => tr.classList.remove('show'), 400); }, 650);
 }
+
+/* ── Auto-resize: report content height to the parent frame so the ── *
+ * ── embedding iframe grows/shrinks to fit — no internal scrollbar ── */
+(function(){
+  function contentHeight(){
+    const main = document.getElementById('main');
+    if (main && getComputedStyle(main).display !== 'none') {
+      return Math.ceil(main.getBoundingClientRect().height) + 8;
+    }
+    return 640; // intro / transition baseline
+  }
+  let last = 0;
+  function postHeight(){
+    const h = contentHeight();
+    if (h === last) return;
+    last = h;
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type:'limitless-demo-height', height:h }, '*');
+    }
+  }
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(postHeight);
+    ro.observe(document.body);
+    const m = document.getElementById('main');
+    if (m) ro.observe(m);
+  } else {
+    setInterval(postHeight, 400);
+  }
+  postHeight();
+})();
 </script>
 </body>
 </html>

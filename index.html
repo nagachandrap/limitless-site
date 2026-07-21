@@ -48,7 +48,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:var(--ink);b
 /* ── HERO DEMO ── */
 .hero-demo{max-width:1080px;margin:0 auto;position:relative;padding-bottom:2.5rem}
 .demo-frame-wrap{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);box-shadow:0 12px 48px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.04);background:#0A0A0A}
-.demo-frame-wrap iframe{width:100%;height:720px;border:none;display:block}
+.demo-frame-wrap iframe{width:100%;height:640px;border:none;display:block;transition:height .35s ease}
 .demo-label{text-align:center;margin-top:1.2rem;font-size:.82rem;color:var(--ink4)}
 
 /* ── LOGO MARQUEE ── */
@@ -173,7 +173,6 @@ footer a:hover{color:var(--ink2)}
   .mob-btn{display:flex}
   .hero{padding:8rem 0 0}
   .hero h1{font-size:2.2rem}
-  .demo-frame-wrap iframe{height:480px}
   .vp-grid,.engine-grid,.story-inner,.platform-grid,.team-grid{grid-template-columns:1fr}
   .data-callout{grid-template-columns:1fr}
   .story-inner{padding:2rem}
@@ -480,6 +479,19 @@ mb.addEventListener('click',()=>nl.classList.toggle('open'));
 nl.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nl.classList.remove('open')));
 const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1});
 document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* Demo iframe auto-resize — height is driven by the demo's own content (no scrollbar, adjusts per scene & on mobile) */
+(function(){
+  const dframe=document.querySelector('.demo-frame-wrap iframe');
+  if(!dframe)return;
+  window.addEventListener('message',e=>{
+    if(e.source!==dframe.contentWindow)return;
+    const d=e.data;
+    if(!d||d.type!=='limitless-demo-height')return;
+    const h=Math.max(320,Math.min(4000,Number(d.height)||0));
+    if(h)dframe.style.height=h+'px';
+  });
+})();
 </script>
 </body>
 </html>
