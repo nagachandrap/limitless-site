@@ -278,6 +278,12 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .ct-form select option{background:#054B52;color:#fff}
 .ct-form textarea{resize:vertical;min-height:80px}
 .ct-btn{font-family:var(--font-d);background:#fff;color:var(--teal-dark);padding:1rem 2.4rem;border-radius:10px;font-size:.95rem;font-weight:700;border:none;cursor:pointer;transition:all .3s;margin-top:.3rem}
+.ct-btn:disabled{opacity:.7;cursor:default}
+.ct-status{font-size:.82rem;line-height:1.5;margin-top:.4rem;min-height:1.2em;text-align:center}
+.ct-status.ok{color:#7FE3C0}
+.ct-status.err{color:#FFB4B4}
+.ct-status a{color:#fff;text-decoration:underline}
+.ct-honey{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 .ct-btn:hover{background:var(--gold);color:var(--navy-mid);transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,162,39,.3)}
 
 .footer{background:#032E33;border-top:1px solid rgba(0,212,232,.1);padding:1.8rem 4vw;text-align:center}
@@ -541,11 +547,19 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 <section class="contact" id="contact">
   <h2 class="ct-h rv">The next era of manufacturing <em>starts here.</em></h2>
   <p class="ct-sub rv d1">We don't do pilots. We deploy, embed, and own outcomes. Tell us about your plant — and we'll tell you if we're the right fit.</p>
-  <form class="ct-form rv d2" onsubmit="handleSubmit(event)">
-    <div class="ct-row"><input type="text" placeholder="Your name" required><input type="text" placeholder="Company name" required></div>
-    <div class="ct-row"><input type="email" placeholder="Work email" required><select onchange="this.classList.toggle('filled',this.value!=='')"><option value="">Your role</option><option>Founder / CMD / MD</option><option>CFO / Finance Head</option><option>Plant Head / Operations</option><option>CTO / IT Head</option><option>Other</option></select></div>
-    <textarea placeholder="Tell us about your plant and the problem you want to solve." rows="3"></textarea>
+  <form class="ct-form rv d2" id="waitlistForm">
+    <div class="ct-row">
+      <input type="text" name="name" placeholder="Your name" aria-label="Your name" autocomplete="name" required>
+      <input type="text" name="company" placeholder="Company name" aria-label="Company name" autocomplete="organization" required>
+    </div>
+    <div class="ct-row">
+      <input type="email" name="email" placeholder="Work email" aria-label="Work email" autocomplete="email" inputmode="email" required>
+      <select name="role" aria-label="Your role" required onchange="this.classList.toggle('filled',this.value!=='')"><option value="">Your role</option><option>Founder / CMD / MD</option><option>CFO / Finance Head</option><option>Plant Head / Operations</option><option>CTO / IT Head</option><option>Other</option></select>
+    </div>
+    <textarea name="message" placeholder="Tell us about your plant and the problem you want to solve." aria-label="About your plant" rows="3"></textarea>
+    <input type="text" name="_honey" class="ct-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
     <button type="submit" class="ct-btn">Tell us about your plant →</button>
+    <p class="ct-status" id="ctStatus" role="status" aria-live="polite"></p>
   </form>
 </section>
 
@@ -584,8 +598,59 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click'
   track.innerHTML=html+html;
 })();
 
-// FORM
-function handleSubmit(e){e.preventDefault();const b=e.target.querySelector('.ct-btn');b.textContent='✓ We\'ll be in touch.';b.style.background='var(--gold)';b.style.color='var(--navy-mid)';b.disabled=true;setTimeout(()=>{b.textContent='Tell us about your plant →';b.style.background='';b.style.color='';b.disabled=false;e.target.reset()},3500)}
+// CONTACT FORM
+// This is a static site, so submissions are relayed to email by FormSubmit.
+// Swapping providers means changing FORM_ENDPOINT and nothing else.
+(function(){
+  const TO='foundingteam@limitless-enterprise.ai';
+  const FORM_ENDPOINT='https://formsubmit.co/ajax/'+TO;
+  const form=document.getElementById('waitlistForm');
+  if(!form)return;
+  const btn=form.querySelector('.ct-btn');
+  const status=document.getElementById('ctStatus');
+  const label=btn.textContent;
+
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const data=Object.fromEntries(new FormData(form).entries());
+    if(data._honey)return;                       // honeypot: silently drop bots
+    delete data._honey;
+
+    btn.disabled=true;btn.textContent='Sending…';
+    status.textContent='';status.className='ct-status';
+
+    try{
+      const res=await fetch(FORM_ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({...data,
+          _subject:'Waitlist enquiry — '+(data.company||'unknown company'),
+          _template:'table',
+          _captcha:'false'})
+      });
+      const out=await res.json().catch(()=>({}));
+      if(!res.ok||out.success===false||out.success==='false')throw new Error(out.message||('HTTP '+res.status));
+
+      btn.textContent="✓ We'll be in touch.";
+      btn.style.background='var(--gold)';btn.style.color='var(--navy-mid)';
+      status.className='ct-status ok';
+      status.textContent='Thanks — your details are on their way to our founding team.';
+      form.reset();
+      form.querySelectorAll('select').forEach(s=>s.classList.remove('filled'));
+      setTimeout(()=>{btn.textContent=label;btn.style.background='';btn.style.color='';btn.disabled=false},5000);
+    }catch(err){
+      // Never report success we did not get. Hand the visitor a way through
+      // instead, pre-filled, so a lead is not silently lost.
+      btn.textContent=label;btn.disabled=false;
+      const subject=encodeURIComponent('Waitlist enquiry — '+(data.company||''));
+      const body=encodeURIComponent(
+        'Name: '+(data.name||'')+'\nCompany: '+(data.company||'')+
+        '\nEmail: '+(data.email||'')+'\nRole: '+(data.role||'')+'\n\n'+(data.message||''));
+      status.className='ct-status err';
+      status.innerHTML='That didn\'t send. <a href="mailto:'+TO+'?subject='+subject+'&body='+body+'">Email us directly</a> — your details are already filled in.';
+    }
+  });
+})();
 
 // ═══════════════════════════════════════
 // SCROLL PROGRESS HELPER
