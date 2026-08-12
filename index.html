@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Limitless — India's Manufacturing Operating System</title>
+<meta name="theme-color" content="#0A8493">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -17,7 +19,10 @@
   --font-b:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;
 }
 html{scroll-behavior:smooth}
-body{font-family:var(--font-b);background:var(--off-white);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-b);background:var(--off-white);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body.nav-open{overflow:hidden}
+/* Anchor targets must clear the fixed nav */
+section[id],div[id]{scroll-margin-top:84px}
 
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:1.25rem 4vw;display:flex;align-items:center;justify-content:space-between;transition:all .4s;background:transparent}
@@ -31,6 +36,14 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .nav-links a:hover{color:var(--teal)}
 .nav-cta{background:var(--teal)!important;color:#fff!important;padding:.6rem 1.5rem;border-radius:8px;font-weight:600!important;transition:all .3s!important}
 .nav-cta:hover{background:var(--teal-deep)!important;transform:translateY(-1px)}
+/* HAMBURGER — display:none on desktop keeps it out of the nav's flex layout entirely */
+.nav-ham{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;width:44px;height:44px;z-index:102}
+.nav-ham span{display:block;width:22px;height:2px;background:var(--navy-mid);border-radius:2px;transition:all .3s}
+.nav.on-dark:not(.scrolled) .nav-ham span{background:#fff}
+.nav-ham.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.nav-ham.open span:nth-child(2){opacity:0}
+.nav-ham.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.nav-overlay{display:none}
 
 /* REVEAL */
 .rv{opacity:0;transform:translateY(32px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
@@ -38,7 +51,7 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 4vw 4rem;position:relative;overflow:hidden}
+.hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 4vw 4rem;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-30%;right:-20%;width:900px;height:900px;background:radial-gradient(circle,var(--teal-glow) 0%,transparent 70%);border-radius:50%;animation:gd 8s ease-in-out infinite;pointer-events:none}
 @keyframes gd{0%,100%{transform:scale(1) translate(0,0);opacity:.5}50%{transform:scale(1.2) translate(-40px,30px);opacity:1}}
 .hero h1{font-family:var(--font-d);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:800;line-height:1.1;color:var(--navy-mid);max-width:820px;position:relative;z-index:1}
@@ -77,7 +90,7 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
    EVOLUTION — SCROLL-TRIGGERED STICKY
    ═══════════════════════════════════════ */
 #shiftOuter{position:relative;height:300vh}
-.shift{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--warm-white);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4vw;gap:0}
+.shift{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--warm-white);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4vw;gap:0}
 .shift-top{text-align:center;margin-bottom:1.5rem;flex-shrink:0}
 .shift-h{font-family:var(--font-d);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;line-height:1.1;color:var(--navy-mid)}
 .shift-h em{font-style:normal;color:var(--teal)}
@@ -146,29 +159,35 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .sp-label{font-family:var(--font-d);font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-light);min-width:80px;transition:color .5s}
 .sp-label.gold{color:var(--gold)}
 
-/* Mobile tap-nav (shared) */
-.mob-nav{display:none;align-items:center;justify-content:center;gap:1rem;padding:1.2rem 0 0;flex-shrink:0}
-.mob-nav-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border);background:var(--warm-white);color:var(--text-secondary);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
-.mob-nav-btn:hover,.mob-nav-btn:active{border-color:var(--teal);color:var(--teal);background:var(--teal-light)}
-.mob-nav-btn:disabled{opacity:.25;pointer-events:none}
-.mob-nav-dots{display:flex;gap:.5rem;align-items:center}
-.mob-nav-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .4s}
-.mob-nav-dot.on{background:var(--teal);transform:scale(1.3)}
-
+/* Mobile keeps the desktop scroll-driven reveal — content is scaled to fit one
+   pinned screen. Everything below only narrows type/artwork; the behaviour is shared. */
 @media(max-width:800px){
-  #shiftOuter{height:auto}
-  .shift{position:relative;height:auto;min-height:0;padding:3.5rem 4vw 2rem;display:flex}
-  .shift-main{grid-template-columns:1fr;gap:1.5rem}
-  .evo-text-wrap{min-height:0}
-  .evo-text-block{position:relative;top:auto;left:auto;display:none;opacity:1;transform:none;transition:none}
-  .evo-text-block.active{display:block}
-  .evo-objs{justify-content:center;gap:1.5rem}
-  .evo-obj-vis svg{width:75px!important;height:auto!important}
+  #shiftOuter{height:260vh}
+  .shift{padding:5.5rem 5vw 4rem}
+  .shift-top{margin-bottom:1.2rem}
+  .shift-h{font-size:1.5rem}
+  .shift-sub{font-size:.85rem;max-width:340px}
+  .shift-main{grid-template-columns:1fr;gap:1.2rem}
+  .evo-text-wrap{min-height:215px}
+  .etb-title{font-size:2rem}
+  .etb-desc{font-size:.85rem;max-width:none}
+  .etb-tag{margin-top:.9rem}
+  .evo-objs{justify-content:center;gap:1.2rem}
+  .evo-obj-vis svg{width:70px!important;height:auto!important}
   .evo-obj.dim{opacity:.2;transform:scale(.8)}
   .evo-obj.past{opacity:.35;transform:scale(.88)}
   .evo-obj.lit{transform:scale(1)}
-  .shift-progress{display:none}
-  .mob-nav{display:flex}
+  .shift-progress{bottom:1.5rem;gap:.7rem}
+  .sp-bar{width:110px}
+}
+/* Short screens (iPhone SE and similar) — trim so a pinned stage always fits */
+@media(max-width:800px) and (max-height:720px){
+  .shift-sub{display:none}
+  .shift-h{font-size:1.3rem}
+  .etb-title{font-size:1.7rem}
+  .etb-desc{font-size:.8rem}
+  .evo-text-wrap{min-height:185px}
+  .evo-obj-vis svg{width:58px!important}
 }
 
 /* ═══════════════════════════════════
@@ -200,7 +219,7 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
    DEMO — SCROLL-TRIGGERED STICKY
    ═══════════════════════════════════ */
 #demoOuter{position:relative;height:300vh}
-.demo-section{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--warm-white);display:flex;align-items:center;padding:0 4vw}
+.demo-section{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--warm-white);display:flex;align-items:center;padding:0 4vw}
 .demo-inner{max-width:1060px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 340px;gap:3rem;align-items:center}
 .demo-text h2{font-family:var(--font-d);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;line-height:1.1;color:var(--navy-mid)}
 .demo-text h2 em{font-style:normal;color:var(--teal)}
@@ -232,16 +251,26 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .phone-input-field{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:8px 14px;font-size:.75rem;color:rgba(255,255,255,.3);font-family:var(--font-b)}
 .phone-send{width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
 
+/* Mobile keeps the desktop scroll-driven scenario switch; the mock scales to fit
+   one pinned screen. The chat never becomes touch-scrollable, so a swipe over the
+   phone always advances the page rather than being swallowed by a nested scroller. */
 @media(max-width:900px){
-  #demoOuter{height:auto}
-  .demo-section{position:relative;height:auto;padding:3.5rem 4vw 2rem}
-  .demo-inner{grid-template-columns:1fr;justify-items:center;gap:1.5rem}
+  #demoOuter{height:260vh}
+  .demo-section{padding:5rem 5vw 3rem}
+  .demo-inner{grid-template-columns:1fr;justify-items:center;gap:1.1rem}
   .demo-text{text-align:center}
-  .demo-text>p{margin-left:auto;margin-right:auto}
-  .demo-tabs{justify-content:center}
-  .demo-phone{width:280px}
-  .phone-screen{min-height:480px}
-  .phone-chat{min-height:320px}
+  .demo-text h2{font-size:1.5rem}
+  .demo-text>p{margin-left:auto;margin-right:auto;font-size:.85rem;margin-top:.5rem}
+  .demo-tabs{justify-content:center;margin-top:.9rem}
+  .demo-tab{min-height:44px;display:inline-flex;align-items:center;padding:.5rem 1.15rem}
+  .demo-phone{width:min(280px,78vw)}
+  .phone-screen{min-height:min(460px,46svh);display:flex;flex-direction:column}
+  .phone-chat{flex:1;min-height:0;overflow:hidden}
+}
+@media(max-width:900px) and (max-height:720px){
+  .demo-text>p{display:none}
+  .demo-text h2{font-size:1.35rem}
+  .phone-screen{min-height:min(400px,44svh)}
 }
 
 /* FOUNDERS */
@@ -285,14 +314,46 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 .footer a{color:rgba(255,255,255,.4);text-decoration:none}.footer a:hover{color:#fff}
 
 @media(max-width:900px){.tr-stats{grid-template-columns:1fr 1fr}.f-inner{grid-template-columns:1fr}.ct-row{grid-template-columns:1fr}.ctx-canvas-zone{min-height:400px}.hero{padding:6rem 5vw 3rem}.hero h1{font-size:1.8rem}.hero-sub{font-size:.92rem}.problem-section{padding:4rem 5vw}.problem-h{font-size:1.6rem}.traction{padding:4rem 4vw}.tr-num{font-size:2.5rem}.contact{padding:4rem 5vw}.ctx-header{padding:4rem 4vw 2rem}}
-@media(max-width:600px){.nav-links a:not(.nav-cta){display:none}.tr-stats{grid-template-columns:1fr}.ctx-canvas-zone{min-height:300px}.ticker-wrap{margin-top:2rem}.prob-cards{gap:1rem}.prob-card{padding:1.2rem}}
+@media(max-width:600px){.tr-stats{grid-template-columns:1fr}.ctx-canvas-zone{min-height:300px}.ticker-wrap{margin-top:2rem}.prob-cards{gap:1rem}.prob-card{padding:1.2rem}}
+
+/* ═══════════════════════════════
+   MOBILE NAV + TOUCH TARGETS
+   ═══════════════════════════════ */
+@media(max-width:768px){
+  .nav{padding:1rem 5vw}
+  .nav.scrolled{padding:.75rem 5vw}
+  .nav-ham{display:flex}
+  .nav-links{position:fixed;top:0;right:-100%;width:75vw;max-width:300px;height:100vh;height:100dvh;background:rgba(247,250,251,.98);backdrop-filter:blur(24px);flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:5rem 2rem 2rem;gap:.5rem;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-10px 0 40px rgba(0,0,0,.1);z-index:101}
+  .nav-links.open{right:0}
+  .nav.on-dark:not(.scrolled) .nav-links a{color:var(--navy-mid)}
+  .nav-links a{font-size:1.1rem;font-weight:600;color:var(--navy-mid);width:100%;min-height:44px;display:flex;align-items:center}
+  .nav-cta{width:100%;text-align:center;justify-content:center;padding:.85rem 1.5rem!important;margin-top:.5rem}
+  .nav-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100}
+  .nav-overlay.open{display:block}
+  /* 16px minimum stops iOS Safari zooming the page on field focus */
+  .ct-form input,.ct-form select,.ct-form textarea{font-size:16px}
+  .ct-btn{min-height:44px}
+  .btn-p{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .s-tag{padding:.6rem 1.2rem}
+}
+
+/* ═══════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════ */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .rv{opacity:1;transform:none}
+  .ticker-track{animation:none}
+}
 </style>
 </head>
 <body>
 
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">LIMITLESS</a>
-  <div class="nav-links">
+  <div class="nav-ham" id="navHam" role="button" tabindex="0" aria-label="Menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></div>
+  <div class="nav-overlay" id="navOverlay"></div>
+  <div class="nav-links" id="navLinks">
     <a href="#problem">Why</a>
     <a href="#context">Platform</a>
     <a href="#traction">Traction</a>
@@ -452,16 +513,6 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
     <div class="sp-bar"><div class="sp-fill" id="spFill"></div></div>
     <div class="sp-label" id="spLabel">Generation 1</div>
   </div>
-  <!-- Tap nav (mobile) -->
-  <div class="mob-nav" id="evoMobNav">
-    <button class="mob-nav-btn" id="evoMobPrev" disabled>←</button>
-    <div class="mob-nav-dots">
-      <div class="mob-nav-dot on" data-i="0"></div>
-      <div class="mob-nav-dot" data-i="1"></div>
-      <div class="mob-nav-dot" data-i="2"></div>
-    </div>
-    <button class="mob-nav-btn" id="evoMobNext">→</button>
-  </div>
 </section>
 </div>
 
@@ -552,15 +603,43 @@ body{font-family:var(--font-b);background:var(--off-white);color:var(--text-prim
 <footer class="footer"><p>© 2026 Limitara Technologies Pvt. Ltd. · Bengaluru · <a href="mailto:Unlock@limitless-enterprise.ai">Unlock@limitless-enterprise.ai</a></p></footer>
 
 <script>
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+
+// One passive listener, rAF-batched, shared by every scroll-driven module below.
+const scrollFns=[];
+let ticking=false;
+addEventListener('scroll',()=>{
+  if(ticking)return;
+  ticking=true;
+  requestAnimationFrame(()=>{ticking=false;for(const f of scrollFns)f()});
+},{passive:true});
+
 // NAV
 const nav=document.getElementById('nav');
+const navHam=document.getElementById('navHam');
+const navLinks=document.getElementById('navLinks');
+const navOverlay=document.getElementById('navOverlay');
+const darkSections=['.problem-section','.ctx-section','.contact'].map(s=>document.querySelector(s)).filter(Boolean);
+
+function setMenu(open){
+  navHam.classList.toggle('open',open);
+  navLinks.classList.toggle('open',open);
+  navOverlay.classList.toggle('open',open);
+  document.body.classList.toggle('nav-open',open);
+  navHam.setAttribute('aria-expanded',open?'true':'false');
+}
+navHam.addEventListener('click',()=>setMenu(!navLinks.classList.contains('open')));
+navHam.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setMenu(!navLinks.classList.contains('open'))}});
+navOverlay.addEventListener('click',()=>setMenu(false));
+navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
+
 function updNav(){
   nav.classList.toggle('scrolled',scrollY>60);
   let dark=false;
-  ['.problem-section','.ctx-section','.contact'].forEach(s=>{const el=document.querySelector(s);if(el){const r=el.getBoundingClientRect();if(r.top<80&&r.bottom>80)dark=true}});
+  for(const el of darkSections){const r=el.getBoundingClientRect();if(r.top<80&&r.bottom>80){dark=true;break}}
   nav.classList.toggle('on-dark',dark);
 }
-addEventListener('scroll',updNav,{passive:true});
+scrollFns.push(updNav);
 
 // REVEAL
 const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')})},{threshold:.12,rootMargin:'0px 0px -30px 0px'});
@@ -570,8 +649,12 @@ document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
 const co=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting&&!x.target.dataset.done){x.target.dataset.done='1';const t=+x.target.dataset.t,s=performance.now();(function step(n){const p=Math.min((n-s)/2000,1),ease=1-Math.pow(1-p,3);x.target.textContent=Math.floor(ease*t).toLocaleString('en-IN');if(p<1)requestAnimationFrame(step);else x.target.textContent=t.toLocaleString('en-IN')})(s)}})},{threshold:.5});
 document.querySelectorAll('.ctr').forEach(c=>co.observe(c));
 
-// PARALLAX
-addEventListener('scroll',()=>{const h=document.querySelector('.hero h1');if(h)h.style.transform=`translateY(${pageYOffset*.08}px)`},{passive:true});
+// PARALLAX — desktop only; on phones it costs a repaint per frame and fights the pinned sections
+const heroH1=document.querySelector('.hero h1');
+scrollFns.push(()=>{
+  if(!heroH1||reduceMotion.matches||innerWidth<=800)return;
+  heroH1.style.transform=`translateY(${scrollY*.08}px)`;
+});
 
 // SMOOTH LINKS
 document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'})})});
@@ -590,11 +673,12 @@ function handleSubmit(e){e.preventDefault();const b=e.target.querySelector('.ct-
 // ═══════════════════════════════════════
 // SCROLL PROGRESS HELPER
 // ═══════════════════════════════════════
-function scrollProgress(el){
-  const rect=el.getBoundingClientRect();
-  const scrolled=-rect.top;
-  const total=el.offsetHeight-window.innerHeight;
-  return total>0?Math.max(0,Math.min(1,scrolled/total)):0;
+// Measured against the pinned child rather than innerHeight, so the mobile address
+// bar sliding in and out cannot skew the stage boundaries.
+function scrollProgress(outer,sticky){
+  const rect=outer.getBoundingClientRect();
+  const total=outer.offsetHeight-(sticky?sticky.offsetHeight:window.innerHeight);
+  return total>0?Math.max(0,Math.min(1,-rect.top/total)):0;
 }
 
 // ═══════════════════════════════════════
@@ -602,17 +686,14 @@ function scrollProgress(el){
 // ═══════════════════════════════════════
 (function(){
   const outer=document.getElementById('shiftOuter');
+  const sticky=document.getElementById('shift');
   const objs=document.querySelectorAll('.evo-obj');
   const textBlocks=document.querySelectorAll('.evo-text-block');
   const fill=document.getElementById('spFill');
   const label=document.getElementById('spLabel');
-  const prevBtn=document.getElementById('evoMobPrev');
-  const nextBtn=document.getElementById('evoMobNext');
-  const mobDots=document.querySelectorAll('#evoMobNav .mob-nav-dot');
   const labels=['Generation 1','Generation 2','Intelligent OS'];
   const fills=['0%','50%','100%'];
-  let current=-1, mobStage=0;
-  const isMobile=()=>window.innerWidth<=800;
+  let current=-1;
 
   function setStage(s){
     if(s===current)return;
@@ -626,25 +707,15 @@ function scrollProgress(el){
     textBlocks.forEach((t,i)=>t.classList.toggle('active',i===s));
     if(fill)fill.style.width=fills[s];
     if(label){label.textContent=labels[s];label.classList.toggle('gold',s===2)}
-    // Update mobile dots
-    mobDots.forEach((d,i)=>d.classList.toggle('on',i===s));
-    if(prevBtn)prevBtn.disabled=s===0;
-    if(nextBtn)nextBtn.disabled=s===2;
   }
 
   function onScroll(){
-    if(isMobile())return;
-    const p=scrollProgress(outer);
-    const s=p<.34?0:p<.68?1:2;
-    setStage(s);
+    const p=scrollProgress(outer,sticky);
+    setStage(p<.34?0:p<.68?1:2);
   }
 
-  // Mobile tap nav
-  if(prevBtn)prevBtn.addEventListener('click',()=>{if(mobStage>0){mobStage--;setStage(mobStage)}});
-  if(nextBtn)nextBtn.addEventListener('click',()=>{if(mobStage<2){mobStage++;setStage(mobStage)}});
-
   setStage(0);
-  addEventListener('scroll',onScroll,{passive:true});
+  scrollFns.push(onScroll);
   onScroll();
 })();
 
@@ -653,11 +724,11 @@ function scrollProgress(el){
 // ═══════════════════════════════════
 (function(){
   const outer=document.getElementById('demoOuter');
+  const sticky=document.querySelector('.demo-section');
   const chatEl=document.getElementById('demoChat');
   const tabs=document.querySelectorAll('.demo-tab');
   let currentDemo=-1;
   let msgTimers=[];
-  const isMobile=()=>window.innerWidth<=900;
 
   const demos=[
     [
@@ -707,18 +778,16 @@ function scrollProgress(el){
   // Tab click (manual override)
   tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>renderDemo(i))});
 
-  // Scroll-driven on desktop
+  // Scroll-driven on every screen size
   function onScroll(){
-    if(isMobile()){if(currentDemo<0)renderDemo(0);return}
-    const p=scrollProgress(outer);
-    const s=p<.34?0:p<.68?1:2;
-    renderDemo(s);
+    const p=scrollProgress(outer,sticky);
+    renderDemo(p<.34?0:p<.68?1:2);
   }
 
   // Start when visible
   const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&currentDemo<0)renderDemo(0)},{threshold:.1});
   obs.observe(document.getElementById('demo'));
-  addEventListener('scroll',onScroll,{passive:true});
+  scrollFns.push(onScroll);
 })();
 // ═══════════════════════════════════════════════
 //  CONTEXT GRAPH CANVAS
@@ -739,11 +808,13 @@ function scrollProgress(el){
   const conns=[[0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[0,1],[1,2],[0,3],[2,5],[3,4],[4,5],[0,4],[1,5],[2,3]];
   const metrics={0:['OEE 87.3%','412 units/hr','Yield 96.1%'],1:['PO #4471','₹2.4L order','3 vendors'],2:['₹4.2Cr recv.','DSO 42d','₹38L overdue'],3:['₹12.4Cr pipe','18.2% conv.','14 follow-ups'],4:['MTBF 340h','Reorder 6205','Spare 82%'],5:['OTIF 97.1%','0 NCRs','Reject 0.8%'],6:['ctx++','decide','✓ act']};
   let bg=[],pulses=[],labels=[];
-  function resize(){const w=canvas.parentElement;W=w.offsetWidth||innerWidth;H=Math.max(w.offsetHeight,480);canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';c.setTransform(dpr,0,0,dpr,0,0);hubs.forEach(h=>{h.x=h.rx*W;h.y=h.ry*H})}
+  // H follows the CSS box. The old Math.max(...,480) floor overflowed the zone in
+  // landscape, where the box is deliberately shorter than 480px.
+  function resize(){const w=canvas.parentElement;W=w.offsetWidth||innerWidth;H=w.offsetHeight||480;lastW=W;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';c.setTransform(dpr,0,0,dpr,0,0);hubs.forEach(h=>{h.x=h.rx*W;h.y=h.ry*H})}
   function init(){resize();bg=[];for(let i=0;i<40;i++)bg.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+.5,p:Math.random()*Math.PI*2})}
   function sp(){const ci=Math.floor(Math.random()*conns.length),cn=conns[ci],a=hubs[cn[0]],b=hubs[cn[1]],d=Math.random()>.5;pulses.push({sx:d?a.x:b.x,sy:d?a.y:b.y,ex:d?b.x:a.x,ey:d?b.y:a.y,t:0,speed:.0025+Math.random()*.003,size:2+Math.random()*1.5})}
   function sl(){const ci=Math.floor(Math.random()*conns.length),cn=conns[ci],d=Math.random()>.5,si=d?cn[0]:cn[1],a=hubs[cn[d?0:1]],b=hubs[cn[d?1:0]],m=metrics[si]||[],tx=m[Math.floor(Math.random()*m.length)];labels.push({sx:a.x,sy:a.y,ex:b.x,ey:b.y,t:0,speed:.0015+Math.random()*.002,text:tx,isC:cn[0]===6||cn[1]===6})}
-  let fr=0;
+  let fr=0,running=false,inView=false,lastW=0;
   function draw(){
     fr++;c.clearRect(0,0,W,H);
     bg.forEach(n=>{n.x+=n.vx;n.y+=n.vy;n.p+=.015;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;c.beginPath();c.arc(n.x,n.y,n.r,0,Math.PI*2);c.fillStyle=`rgba(0,212,232,${.1+Math.sin(n.p)*.05})`;c.fill()});
@@ -752,11 +823,34 @@ function scrollProgress(el){
     for(let i=pulses.length-1;i>=0;i--){const p=pulses[i];p.t+=p.speed;if(p.t>=1){pulses.splice(i,1);continue}const x=p.sx+(p.ex-p.sx)*p.t,y=p.sy+(p.ey-p.sy)*p.t,fd=p.t<.12?p.t/.12:p.t>.88?(1-p.t)/.12:1;const tg=c.createRadialGradient(x,y,0,x,y,12);tg.addColorStop(0,`rgba(0,212,232,${.6*fd})`);tg.addColorStop(1,'transparent');c.beginPath();c.arc(x,y,12,0,Math.PI*2);c.fillStyle=tg;c.fill();c.beginPath();c.arc(x,y,p.size*fd,0,Math.PI*2);c.fillStyle=`rgba(180,255,255,${.9*fd})`;c.fill()}
     for(let i=labels.length-1;i>=0;i--){const d=labels[i];d.t+=d.speed;if(d.t>=1){labels.splice(i,1);continue}const x=d.sx+(d.ex-d.sx)*d.t,y=d.sy+(d.ey-d.sy)*d.t,fd=d.t<.1?d.t/.1:d.t>.85?(1-d.t)/.15:1;c.font="600 11px 'JetBrains Mono',monospace";const tw=c.measureText(d.text).width,px=6,py=4,br=8;c.fillStyle=d.isC?`rgba(201,162,39,${.18*fd})`:`rgba(0,212,232,${.14*fd})`;c.beginPath();c.roundRect(x-tw/2-px,y-7-py,tw+px*2,14+py*2,br);c.fill();c.strokeStyle=d.isC?`rgba(201,162,39,${.35*fd})`:`rgba(0,212,232,${.30*fd})`;c.lineWidth=1;c.stroke();c.fillStyle=d.isC?`rgba(255,230,150,${.9*fd})`:`rgba(180,255,255,${.9*fd})`;c.textAlign='center';c.textBaseline='middle';c.fillText(d.text,x,y);c.textBaseline='alphabetic'}
     if(fr%6===0)sp();if(fr%40===0)sl();if(fr%55===0)sl();if(fr%80===1){sl();sl();sp()}
-    requestAnimationFrame(draw);
   }
-  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting){setTimeout(()=>{init();draw()},50);obs.disconnect()}},{threshold:.05});
+
+  // The loop only runs while the graph is actually on screen and the tab is visible.
+  // Previously it re-armed forever, draining the battery for the whole visit.
+  function frame(){if(!running)return;draw();requestAnimationFrame(frame)}
+  function start(){if(running||!inView||document.hidden||reduceMotion.matches)return;running=true;requestAnimationFrame(frame)}
+  function stop(){running=false}
+
+  let started=false;
+  const obs=new IntersectionObserver(e=>{
+    inView=e[0].isIntersecting;
+    if(inView&&!started){started=true;setTimeout(()=>{init();reduceMotion.matches?draw():start()},50);return}
+    inView?start():stop();
+  },{threshold:.05});
   obs.observe(document.querySelector('.ctx-section'));
-  addEventListener('resize',()=>{if(W)resize()},{passive:true});
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start()});
+
+  // Debounced, and on touch devices a height-only change is the address bar sliding
+  // away rather than a real resize — re-initialising on that causes a visible jump.
+  let rt;
+  addEventListener('resize',()=>{
+    if(!W)return;
+    clearTimeout(rt);
+    rt=setTimeout(()=>{
+      if(canvas.parentElement.offsetWidth===lastW&&matchMedia('(pointer:coarse)').matches)return;
+      resize();
+    },150);
+  },{passive:true});
 })();
 </script>
 </body>
