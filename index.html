@@ -92,7 +92,9 @@ section[id],div[id]{scroll-margin-top:84px}
 #shiftOuter{position:relative;height:300vh}
 .shift{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--warm-white);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4vw;gap:0}
 .shift-top{text-align:center;margin-bottom:1.5rem;flex-shrink:0}
-.shift-h{font-family:var(--font-d);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;line-height:1.1;color:var(--navy-mid)}
+/* Matches the other section headings (Platform / Traction / Contact) so the page
+   keeps one heading rhythm; the stage title below is deliberately a step down. */
+.shift-h{font-family:var(--font-d);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:800;line-height:1.1;color:var(--navy-mid)}
 .shift-h em{font-style:normal;color:var(--teal)}
 .shift-sub{font-size:.95rem;color:var(--text-secondary);max-width:480px;margin:.8rem auto 0;line-height:1.6}
 .shift-main{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;max-width:960px;margin:0 auto;width:100%;flex-shrink:0}
@@ -103,7 +105,7 @@ section[id],div[id]{scroll-margin-top:84px}
 .evo-text-block.active{opacity:1;transform:translateY(0);pointer-events:auto}
 .etb-era{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem}
 .evo-text-block:last-child .etb-era{color:var(--gold)}
-.etb-title{font-family:var(--font-d);font-size:clamp(2rem,3.5vw,3rem);font-weight:800;line-height:1.05;color:var(--navy-mid);margin-bottom:.3rem}
+.etb-title{font-family:var(--font-d);font-size:clamp(1.75rem,2.8vw,2.4rem);font-weight:800;line-height:1.05;color:var(--navy-mid);margin-bottom:.3rem}
 .evo-text-block:last-child .etb-title{color:var(--teal)}
 .etb-what{font-family:var(--font-d);font-size:.9rem;font-weight:600;color:var(--teal);margin-bottom:.8rem}
 .evo-text-block:first-child .etb-what,.evo-text-block:nth-child(2) .etb-what{color:var(--text-light)}
@@ -165,11 +167,11 @@ section[id],div[id]{scroll-margin-top:84px}
   #shiftOuter{height:260vh}
   .shift{padding:5.5rem 5vw 4rem}
   .shift-top{margin-bottom:1.2rem}
-  .shift-h{font-size:1.5rem}
+  .shift-h{font-size:1.75rem}
   .shift-sub{font-size:.85rem;max-width:340px}
   .shift-main{grid-template-columns:1fr;gap:1.2rem}
-  .evo-text-wrap{min-height:215px}
-  .etb-title{font-size:2rem}
+  .evo-text-wrap{min-height:195px}
+  .etb-title{font-size:1.4rem}
   .etb-desc{font-size:.85rem;max-width:none}
   .etb-tag{margin-top:.9rem}
   .evo-objs{justify-content:center;gap:1.2rem}
@@ -179,14 +181,15 @@ section[id],div[id]{scroll-margin-top:84px}
   .evo-obj.lit{transform:scale(1)}
   .shift-progress{bottom:1.5rem;gap:.7rem}
   .sp-bar{width:110px}
+  .sp-label{min-width:0;white-space:nowrap}   /* 80px min-width wrapped "Generation 1" onto two lines */
 }
 /* Short screens (iPhone SE and similar) — trim so a pinned stage always fits */
 @media(max-width:800px) and (max-height:760px){
   .shift-sub{display:none}
-  .shift-h{font-size:1.3rem}
-  .etb-title{font-size:1.7rem}
+  .shift-h{font-size:1.5rem}
+  .etb-title{font-size:1.2rem}
   .etb-desc{font-size:.8rem}
-  .evo-text-wrap{min-height:185px}
+  .evo-text-wrap{min-height:170px}
   .evo-obj-vis svg{width:58px!important}
 }
 
