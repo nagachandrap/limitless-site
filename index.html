@@ -258,7 +258,10 @@ section[id],div[id]{scroll-margin-top:84px}
    one pinned screen. The chat never becomes touch-scrollable, so a swipe over the
    phone always advances the page rather than being swallowed by a nested scroller. */
 @media(max-width:900px){
-  #demoOuter{height:260vh}
+  /* Longer than the evolution section: three conversations of four messages each need
+     more dwell time per stage than three single captions do. At 260vh a stage passed
+     in under a second and swapped scenario before its conversation had played. */
+  #demoOuter{height:320vh}
   .demo-section{padding:4.5rem 5vw 2.5rem;align-items:stretch}
   /* Column layout where the mock claims whatever height is left after the heading
      and tabs, so it fills the pinned screen rather than sitting small in the middle
@@ -849,58 +852,41 @@ function scrollProgress(outer,sticky){
       d.innerHTML=(m.label?'<span class="msg-label">'+m.label+'</span>':'')+m.text;
       chatEl.appendChild(d);
     });
-    // Desktop reveals on a timer: the pinned scroll there is long and slow enough
-    // that a 2.5s cadence reads well. Mobile is driven by scroll position instead.
-    if(!onPhone.matches){
-      chatEl.querySelectorAll('.chat-msg').forEach((msg,i)=>{
-        msgTimers.push(setTimeout(()=>{
-          msg.classList.add('show');
-          chatEl.scrollTop=chatEl.scrollHeight;
-        },i*2500+400));
-      });
-    }
+    play();
   }
 
-  // On a phone the reader sets the pace by scrolling. No fixed cadence can suit both
-  // a thumb-flick and someone stopping to read, and the old auto-scroll-to-bottom
-  // pushed the opening messages out of the mock before they could be read.
-  function revealTo(n){
-    const msgs=chatEl.querySelectorAll('.chat-msg');
-    if(!msgs.length)return;
-    n=Math.max(1,Math.min(msgs.length,n));
-    msgs.forEach((m,i)=>m.classList.toggle('show',i<n));
-    // Only scroll when the conversation genuinely outgrows the mock, and then only
-    // far enough to bring the newest message into view.
-    if(chatEl.scrollHeight>chatEl.clientHeight){
-      const last=msgs[n-1];
-      chatEl.scrollTop=Math.max(0,last.offsetTop+last.offsetHeight-chatEl.clientHeight);
-    }else{
-      chatEl.scrollTop=0;
-    }
+  // One mechanism on every screen size. Mobile only differs in pace, because the
+  // pinned section passes under a thumb faster than under a mouse wheel. Driving
+  // mobile off scroll position instead was the mistake: the conversation froze the
+  // moment the reader stopped scrolling to look at it.
+  function play(){
+    clearMsgTimers();
+    const quick=onPhone.matches;
+    const gap=quick?1000:2500, lead=quick?250:400;
+    chatEl.querySelectorAll('.chat-msg').forEach((msg,i)=>{
+      msgTimers.push(setTimeout(()=>{
+        msg.classList.add('show');
+        // Only scroll when the conversation genuinely outgrows the mock; scrolling
+        // unconditionally is what used to push the opening messages out of view.
+        if(chatEl.scrollHeight>chatEl.clientHeight)chatEl.scrollTop=chatEl.scrollHeight;
+      },i*gap+lead));
+    });
   }
 
-  const BOUNDS=[[0,.34],[.34,.68],[.68,1]];
   function onScroll(){
     const p=scrollProgress(outer,sticky);
-    const stage=p<.34?0:p<.68?1:2;
-    buildDemo(stage);
-    if(onPhone.matches){
-      const [lo,hi]=BOUNDS[stage];
-      const local=Math.max(0,Math.min(1,(p-lo)/(hi-lo)));
-      revealTo(Math.ceil(local*chatEl.children.length));
-    }
+    buildDemo(p<.34?0:p<.68?1:2);
   }
 
-  // Tapping a tab is a deliberate choice, so show that conversation in full.
+  // Tapping a tab replays that conversation from the top, the same way arriving at it
+  // does. It must not jump to the finished state, or tapping and scrolling disagree.
   tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>{
-    buildDemo(i);
-    if(onPhone.matches)revealTo(chatEl.children.length);
+    if(i===currentDemo)play(); else buildDemo(i);
   })});
 
-  // Start when visible
-  const obs=new IntersectionObserver(e=>{
-    if(e[0].isIntersecting&&currentDemo<0){buildDemo(0);if(onPhone.matches)revealTo(1)}
-  },{threshold:.1});
+  // Starts once a decent part of the mock is on screen, so the conversation is playing
+  // when the reader is actually looking at it rather than finishing before they arrive.
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&currentDemo<0)buildDemo(0)},{threshold:.35});
   obs.observe(document.getElementById('demo'));
   scrollFns.push(onScroll);
 })();
