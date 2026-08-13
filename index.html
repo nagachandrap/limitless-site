@@ -259,23 +259,24 @@ section[id],div[id]{scroll-margin-top:84px}
    phone always advances the page rather than being swallowed by a nested scroller. */
 @media(max-width:900px){
   #demoOuter{height:260vh}
-  .demo-section{padding:5rem 5vw 3rem}
-  .demo-inner{grid-template-columns:1fr;justify-items:center;gap:1.1rem}
-  .demo-text{text-align:center}
+  .demo-section{padding:4.5rem 5vw 2.5rem;align-items:stretch}
+  /* Column layout where the mock claims whatever height is left after the heading
+     and tabs, so it fills the pinned screen rather than sitting small in the middle
+     of it. A fixed cap here left it at roughly 280x388 on a 390px phone. */
+  .demo-inner{display:flex;flex-direction:column;align-items:center;gap:.9rem;height:100%;max-width:none}
+  .demo-text{text-align:center;flex-shrink:0}
   .demo-text h2{font-size:1.5rem}
   .demo-text>p{margin-left:auto;margin-right:auto;font-size:.85rem;margin-top:.5rem}
   .demo-tabs{justify-content:center;margin-top:.9rem}
   .demo-tab{min-height:44px;display:inline-flex;align-items:center;padding:.5rem 1.15rem}
-  .demo-phone{width:min(280px,78vw)}
-  /* Explicit height, not min-height: the chat content is taller than the mock and
-     min-height is only a floor, so the phone would grow past the pinned screen. */
-  .phone-screen{min-height:0;height:min(460px,46svh);display:flex;flex-direction:column}
+  .demo-phone{width:min(340px,92vw);flex:1;min-height:0;display:flex}
+  .phone-frame{flex:1;display:flex;flex-direction:column;min-height:0;width:100%;padding:10px;border-radius:34px}
+  .phone-screen{min-height:0;flex:1;display:flex;flex-direction:column;border-radius:26px}
   .phone-chat{flex:1;min-height:0;overflow:hidden}
 }
 @media(max-width:900px) and (max-height:760px){
   .demo-text>p{display:none}
   .demo-text h2{font-size:1.35rem}
-  .phone-screen{height:min(400px,44svh)}
 }
 
 /* FOUNDERS */
@@ -839,8 +840,13 @@ function scrollProgress(outer,sticky){
       d.innerHTML=html;
       chatEl.appendChild(d);
     });
+    // A phone scrolls through this section far faster than a mouse wheel does, so the
+    // desktop cadence (~8s for four messages) leaves the mock looking empty on mobile.
+    // Deal them out quicker there; desktop timing is unchanged.
+    const quick=matchMedia('(max-width:900px)').matches;
+    const gap=quick?750:2500, lead=quick?100:400;
     chatEl.querySelectorAll('.chat-msg').forEach((msg,i)=>{
-      const t=setTimeout(()=>{msg.classList.add('show');chatEl.scrollTop=chatEl.scrollHeight},i*2500+400);
+      const t=setTimeout(()=>{msg.classList.add('show');chatEl.scrollTop=chatEl.scrollHeight},i*gap+lead);
       msgTimers.push(t);
     });
   }
