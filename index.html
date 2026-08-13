@@ -167,7 +167,7 @@ section[id],div[id]{scroll-margin-top:84px}
   #shiftOuter{height:260vh}
   .shift{padding:5.5rem 5vw 4rem}
   .shift-top{margin-bottom:1.2rem}
-  .shift-h{font-size:1.75rem}
+  .shift-h{font-size:1.875rem}
   .shift-sub{font-size:.85rem;max-width:340px}
   .shift-main{grid-template-columns:1fr;gap:1.2rem}
   .evo-text-wrap{min-height:195px}
@@ -186,7 +186,7 @@ section[id],div[id]{scroll-margin-top:84px}
 /* Short screens (iPhone SE and similar) — trim so a pinned stage always fits */
 @media(max-width:800px) and (max-height:760px){
   .shift-sub{display:none}
-  .shift-h{font-size:1.5rem}
+  .shift-h{font-size:1.625rem}
   .etb-title{font-size:1.25rem}
   .etb-desc{font-size:.8rem}
   .evo-text-wrap{min-height:170px}
@@ -272,11 +272,21 @@ section[id],div[id]{scroll-margin-top:84px}
   .demo-phone{width:min(340px,92vw);flex:1;min-height:0;display:flex}
   .phone-frame{flex:1;display:flex;flex-direction:column;min-height:0;width:100%;padding:10px;border-radius:34px}
   .phone-screen{min-height:0;flex:1;display:flex;flex-direction:column;border-radius:26px}
-  .phone-chat{flex:1;min-height:0;overflow:hidden}
+  /* Tightened so the longest conversations (Procurement, Sales) fit without the mock
+     having to scroll — scrolling pushed their opening messages out of view. */
+  .phone-chat{flex:1;min-height:0;overflow:hidden;padding:11px;gap:6px}
+  .chat-msg{font-size:.71rem;padding:7px 10px;line-height:1.42;border-radius:13px;max-width:93%}
+  .chat-msg .msg-label{font-size:.55rem;margin-bottom:2px}
 }
 @media(max-width:900px) and (max-height:760px){
   .demo-text>p{display:none}
   .demo-text h2{font-size:1.35rem}
+}
+/* Narrow phones: the longest conversation (Procurement) still ran a few pixels past
+   the mock, so trim a little further and it fits outright. */
+@media(max-width:380px){
+  .phone-chat{gap:5px;padding:10px}
+  .chat-msg{font-size:.68rem;padding:6px 9px}
 }
 
 /* FOUNDERS */
@@ -824,44 +834,73 @@ function scrollProgress(outer,sticky){
 
   function clearMsgTimers(){msgTimers.forEach(t=>clearTimeout(t));msgTimers=[]}
 
-  function renderDemo(idx){
+  const onPhone=matchMedia('(max-width:900px)');
+
+  function buildDemo(idx){
     if(idx===currentDemo)return;
     currentDemo=idx;
     clearMsgTimers();
     chatEl.innerHTML='';
+    chatEl.scrollTop=0;
     tabs.forEach((t,i)=>t.classList.toggle('active',i===idx));
-    const msgs=demos[idx];
-    msgs.forEach(m=>{
+    demos[idx].forEach(m=>{
       const d=document.createElement('div');
       d.className='chat-msg '+m.type;
-      let html='';
-      if(m.label)html+='<span class="msg-label">'+m.label+'</span>';
-      html+=m.text;
-      d.innerHTML=html;
+      d.innerHTML=(m.label?'<span class="msg-label">'+m.label+'</span>':'')+m.text;
       chatEl.appendChild(d);
     });
-    // A phone scrolls through this section far faster than a mouse wheel does, so the
-    // desktop cadence (~8s for four messages) leaves the mock looking empty on mobile.
-    // Deal them out quicker there; desktop timing is unchanged.
-    const quick=matchMedia('(max-width:900px)').matches;
-    const gap=quick?750:2500, lead=quick?100:400;
-    chatEl.querySelectorAll('.chat-msg').forEach((msg,i)=>{
-      const t=setTimeout(()=>{msg.classList.add('show');chatEl.scrollTop=chatEl.scrollHeight},i*gap+lead);
-      msgTimers.push(t);
-    });
+    // Desktop reveals on a timer: the pinned scroll there is long and slow enough
+    // that a 2.5s cadence reads well. Mobile is driven by scroll position instead.
+    if(!onPhone.matches){
+      chatEl.querySelectorAll('.chat-msg').forEach((msg,i)=>{
+        msgTimers.push(setTimeout(()=>{
+          msg.classList.add('show');
+          chatEl.scrollTop=chatEl.scrollHeight;
+        },i*2500+400));
+      });
+    }
   }
 
-  // Tab click (manual override)
-  tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>renderDemo(i))});
+  // On a phone the reader sets the pace by scrolling. No fixed cadence can suit both
+  // a thumb-flick and someone stopping to read, and the old auto-scroll-to-bottom
+  // pushed the opening messages out of the mock before they could be read.
+  function revealTo(n){
+    const msgs=chatEl.querySelectorAll('.chat-msg');
+    if(!msgs.length)return;
+    n=Math.max(1,Math.min(msgs.length,n));
+    msgs.forEach((m,i)=>m.classList.toggle('show',i<n));
+    // Only scroll when the conversation genuinely outgrows the mock, and then only
+    // far enough to bring the newest message into view.
+    if(chatEl.scrollHeight>chatEl.clientHeight){
+      const last=msgs[n-1];
+      chatEl.scrollTop=Math.max(0,last.offsetTop+last.offsetHeight-chatEl.clientHeight);
+    }else{
+      chatEl.scrollTop=0;
+    }
+  }
 
-  // Scroll-driven on every screen size
+  const BOUNDS=[[0,.34],[.34,.68],[.68,1]];
   function onScroll(){
     const p=scrollProgress(outer,sticky);
-    renderDemo(p<.34?0:p<.68?1:2);
+    const stage=p<.34?0:p<.68?1:2;
+    buildDemo(stage);
+    if(onPhone.matches){
+      const [lo,hi]=BOUNDS[stage];
+      const local=Math.max(0,Math.min(1,(p-lo)/(hi-lo)));
+      revealTo(Math.ceil(local*chatEl.children.length));
+    }
   }
 
+  // Tapping a tab is a deliberate choice, so show that conversation in full.
+  tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>{
+    buildDemo(i);
+    if(onPhone.matches)revealTo(chatEl.children.length);
+  })});
+
   // Start when visible
-  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&currentDemo<0)renderDemo(0)},{threshold:.1});
+  const obs=new IntersectionObserver(e=>{
+    if(e[0].isIntersecting&&currentDemo<0){buildDemo(0);if(onPhone.matches)revealTo(1)}
+  },{threshold:.1});
   obs.observe(document.getElementById('demo'));
   scrollFns.push(onScroll);
 })();
